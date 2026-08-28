@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthInitializer } from "@/providers/auth-initializer";
@@ -13,10 +13,22 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
   const { user, signOut } = useAuth();
+
+  useEffect(() => {
+    const saved = localStorage.getItem("sidebar-collapsed");
+    if (saved !== null) {
+      setIsCollapsed(saved === "true");
+    }
+  }, []);
+
+  const handleToggleCollapse = (collapsed: boolean) => {
+    setIsCollapsed(collapsed);
+    localStorage.setItem("sidebar-collapsed", String(collapsed));
+  };
 
   const handleSignOut = () => {
     signOut().then(() => {
@@ -34,11 +46,11 @@ export default function DashboardLayout({
           user={user}
           handleSignOut={handleSignOut}
           isCollapsed={isCollapsed}
-          setIsCollapsed={setIsCollapsed}
+          setIsCollapsed={handleToggleCollapse}
         />
 
         <div
-          className={`flex flex-col min-h-screen transition-all duration-300 ${isCollapsed ? "md:pl-20" : "md:pl-64"}`}>
+          className={`flex flex-col min-h-screen transition-all duration-300 ${isCollapsed ? "md:pl-20" : "md:pl-56"}`}>
           <main className="flex-grow p-6 md:p-8">{children}</main>
         </div>
       </div>

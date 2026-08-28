@@ -13,6 +13,9 @@ export const NAVIGATION_ITEMS = [
   { name: "Categories", href: ROUTES.CATEGORIES, icon: Tag },
   { name: "Products", href: ROUTES.PRODUCTS, icon: Package },
   { name: "Orders", href: ROUTES.ORDERS, icon: ShoppingBag },
-  // { name: "Users", href: ROUTES.USERS, icon: Users },
-  // { name: "Settings", href: ROUTES.SETTINGS, icon: Settings },
+  { name: "Users", href: ROUTES.USERS, icon: Users },
+];
+
+export const BOTTOM_NAVIGATION_ITEMS = [
+  { name: "Settings", href: ROUTES.SETTINGS, icon: Settings },
 ];
