@@ -7,8 +7,7 @@ import {
 } from "@/services/product/product.hook";
 import { ProductForm } from "@/components/product/ProductForm";
 import { ProductFormValues } from "@/types/product/product.types";
-import { Loader } from "@/components/common/Loader";
-import { ErrorView } from "@/components/common/ErrorView";
+import { QueryBoundary } from "@/components/common/QueryBoundary";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ROUTES } from "@/constants/routes";
 
@@ -20,26 +19,6 @@ export default function EditProductPage() {
   const { mutate: updateProduct, isPending } = useUpdateProduct();
 
   const product = data?.data;
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader size="lg" />
-      </div>
-    );
-  }
-
-  if (isError || !product) {
-    return (
-      <ErrorView
-        message={
-          (error as any)?.response?.data?.message ?? "Product not found."
-        }
-        onRetry={refetch}
-        className="mt-8"
-      />
-    );
-  }
 
   const handleSubmit = (values: ProductFormValues) => {
     updateProduct(
@@ -62,15 +41,21 @@ export default function EditProductPage() {
   };
 
   return (
-    <>
+    <QueryBoundary
+      isLoading={isLoading}
+      isError={isError}
+      error={error}
+      refetch={refetch}
+      hasData={!!product}
+      notFoundMessage="Product not found.">
       <PageHeader
         title="Edit Product"
         subtitle={product?.name}
         backHref={`${ROUTES.PRODUCTS}/${id}`}
       />
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
-        <div className="w-full max-w-lg">
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <div className="w-full max-w-xl">
+          <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
             <ProductForm
               defaultValues={formattedDefaultValues}
               onSubmit={handleSubmit}
@@ -80,6 +65,6 @@ export default function EditProductPage() {
           </div>
         </div>
       </div>
-    </>
+    </QueryBoundary>
   );
 }

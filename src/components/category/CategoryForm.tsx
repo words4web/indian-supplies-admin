@@ -41,11 +41,12 @@ export function CategoryForm({
   }, [nameValue, isEditing, setValue]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
       <Input
         id="name"
         label="Category Name"
         placeholder="e.g. Flours & Grains"
+        className="h-14 text-base px-4"
         error={errors.name?.message}
         {...register("name", { required: "Name is required" })}
       />
@@ -54,6 +55,7 @@ export function CategoryForm({
         id="slug"
         label="Slug"
         placeholder="e.g. flours-and-grains"
+        className="h-14 text-base px-4"
         error={errors.slug?.message}
         {...register("slug", {
           required: "Slug is required",
@@ -64,16 +66,16 @@ export function CategoryForm({
         })}
       />
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 py-1">
         <input
           id="isActive"
           type="checkbox"
-          className="size-4 rounded border-input accent-primary"
+          className="size-5 rounded border-input accent-primary cursor-pointer"
           {...register("isActive")}
         />
         <label
           htmlFor="isActive"
-          className="text-sm font-medium text-foreground">
+          className="text-base font-semibold text-foreground cursor-pointer select-none">
           Active
         </label>
       </div>
@@ -81,9 +83,12 @@ export function CategoryForm({
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
-        {isLoading && <Loader size="sm" />}
-        {submitLabel}
+        className="w-full h-14 rounded-xl bg-primary text-primary-foreground text-lg font-extrabold hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer">
+        {isLoading ? (
+          <Loader size="sm" text="Creating..." className="animate-pulse" />
+        ) : (
+          submitLabel
+        )}
       </button>
     </form>
   );

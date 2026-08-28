@@ -1,4 +1,3 @@
-import React from "react";
 import { AlertCircle } from "lucide-react";
 import { ErrorViewProps } from "@/types/common.types";
 
@@ -20,7 +19,7 @@ export function ErrorView({
         <button
           type="button"
           onClick={onRetry}
-          className="mt-4 px-4 py-2 text-xs font-bold text-primary-foreground bg-primary hover:bg-primary/95 rounded-xl transition-colors">
+          className="mt-4 px-4 py-2 text-xs font-bold text-primary-foreground bg-primary hover:bg-primary/95 rounded-xl transition-colors cursor-pointer">
           Try Again
         </button>
       )}
