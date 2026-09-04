@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useRouter } from "next/navigation";
 import { useCreateCategory } from "@/services/category/category.hook";
 import { CategoryForm } from "@/components/category/CategoryForm";
@@ -26,8 +25,8 @@ export default function NewCategoryPage() {
         backHref={ROUTES.CATEGORIES}
       />
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
-        <div className="w-full max-w-lg">
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <div className="w-full max-w-xl">
+          <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
             <CategoryForm
               onSubmit={handleSubmit}
               isLoading={isPending}

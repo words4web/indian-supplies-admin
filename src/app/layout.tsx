@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { ReduxProvider } from "@/providers/redux-provider";
 import { QueryProvider } from "@/providers/query-provider";
+import { SocketProvider } from "@/providers/socket-provider";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -12,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-jakarta",
 });
 
@@ -40,7 +41,9 @@ export default function RootLayout({
       className={`bg-background ${geistSans.variable} ${geistMono.variable} ${jakarta.variable}`}>
       <body className="font-sans antialiased">
         <ReduxProvider>
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider>
+            <SocketProvider>{children}</SocketProvider>
+          </QueryProvider>
         </ReduxProvider>
         <Toaster position="top-right" richColors />
       </body>

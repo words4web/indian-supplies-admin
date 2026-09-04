@@ -56,7 +56,7 @@ export function RowActions({ actions, id }: RowActionsProps) {
           ref={btnRef}
           id={id}
           onClick={handleToggle}
-          className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+          className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground cursor-pointer"
           title="Actions">
           <MoreHorizontal className="size-4" />
         </button>
@@ -67,7 +67,7 @@ export function RowActions({ actions, id }: RowActionsProps) {
           ref={dropdownRef}
           onClick={(e) => e.stopPropagation()}
           style={{ position: "fixed", top: coords.top, right: coords.right }}
-          className="z-50 min-w-[150px] rounded-xl border border-border bg-card shadow-lg py-1 animate-in fade-in slide-in-from-top-1 duration-100">
+          className="z-50 min-w-[150px] rounded-xl border border-border bg-card shadow-lg py-1 animate-in fade-in slide-in-from-top-1 duration-100 ">
           {actions?.map((action, i) => (
             <button
               key={i}
@@ -76,7 +76,7 @@ export function RowActions({ actions, id }: RowActionsProps) {
                 action.onClick();
                 setOpen(false);
               }}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors hover:bg-muted text-left ${
+              className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors hover:bg-muted text-left cursor-pointer ${
                 action.variant === "danger"
                   ? "text-destructive hover:bg-destructive/10"
                   : "text-foreground"

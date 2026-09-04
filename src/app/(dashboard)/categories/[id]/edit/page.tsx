@@ -7,8 +7,7 @@ import {
 } from "@/services/category/category.hook";
 import { CategoryForm } from "@/components/category/CategoryForm";
 import { CategoryFormValues } from "@/types/category/category.types";
-import { Loader } from "@/components/common/Loader";
-import { ErrorView } from "@/components/common/ErrorView";
+import { QueryBoundary } from "@/components/common/QueryBoundary";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ROUTES } from "@/constants/routes";
 
@@ -21,26 +20,6 @@ export default function EditCategoryPage() {
 
   const category = data?.data;
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader size="lg" />
-      </div>
-    );
-  }
-
-  if (isError || !category) {
-    return (
-      <ErrorView
-        message={
-          (error as any)?.response?.data?.message ?? "Category not found."
-        }
-        onRetry={refetch}
-        className="mt-8"
-      />
-    );
-  }
-
   const handleSubmit = (values: CategoryFormValues) => {
     updateCategory(
       { id, payload: values },
@@ -49,20 +28,26 @@ export default function EditCategoryPage() {
   };
 
   return (
-    <>
+    <QueryBoundary
+      isLoading={isLoading}
+      isError={isError}
+      error={error}
+      refetch={refetch}
+      hasData={!!category}
+      notFoundMessage="Category not found.">
       <PageHeader
         title="Edit Category"
-        subtitle={category.name}
+        subtitle={category?.name}
         backHref={`${ROUTES.CATEGORIES}/${id}`}
       />
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
-        <div className="w-full max-w-lg">
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <div className="w-full max-w-xl">
+          <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
             <CategoryForm
               defaultValues={{
-                name: category.name,
-                slug: category.slug,
-                isActive: category.isActive,
+                name: category?.name,
+                slug: category?.slug,
+                isActive: category?.isActive,
               }}
               onSubmit={handleSubmit}
               isLoading={isPending}
@@ -71,6 +56,6 @@ export default function EditCategoryPage() {
           </div>
         </div>
       </div>
-    </>
+    </QueryBoundary>
   );
 }

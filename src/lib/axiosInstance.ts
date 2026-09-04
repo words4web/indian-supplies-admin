@@ -4,7 +4,7 @@ import { clearAuth, setAccessToken } from "@/lib/store/authSlice";
 import { API_ROUTES } from "@/constants/api";
 import { ROUTES } from "@/constants/routes";
 
-const API_BASE_URL =
+export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5005/api/v1";
 
 export const axiosInstance: AxiosInstance = axios.create({

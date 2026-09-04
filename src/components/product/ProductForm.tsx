@@ -53,11 +53,12 @@ export function ProductForm({
   }, [nameValue, isEditing, setValue]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
       <Input
         id="name"
         label="Product Name"
         placeholder="e.g. Basmati Rice Extra Long"
+        className="h-14 text-base px-4"
         error={errors.name?.message}
         {...register("name", { required: "Name is required" })}
       />
@@ -66,6 +67,7 @@ export function ProductForm({
         id="slug"
         label="Slug"
         placeholder="e.g. basmati-rice-extra-long"
+        className="h-14 text-base px-4"
         error={errors.slug?.message}
         {...register("slug", {
           required: "Slug is required",
@@ -76,11 +78,12 @@ export function ProductForm({
         })}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <Input
           id="pack"
           label="Pack Size / Weight"
           placeholder="e.g. 5kg, 12x400g"
+          className="h-14 text-base px-4"
           error={errors.pack?.message}
           {...register("pack", { required: "Pack size is required" })}
         />
@@ -88,10 +91,11 @@ export function ProductForm({
         <Input
           id="price"
           type="number"
-          step="1"
+          step="0.01"
           min={0}
           label="Price (£)"
           placeholder="e.g. 12.99"
+          className="h-14 text-base px-4"
           error={errors.price?.message}
           {...register("price", {
             required: "Price is required",
@@ -101,20 +105,20 @@ export function ProductForm({
         />
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <label
           htmlFor="categoryId"
-          className="text-sm font-bold text-foreground">
+          className="text-base font-bold text-foreground">
           Category
         </label>
         {isLoadingCategories ? (
-          <div className="h-11 flex items-center px-3 border border-input bg-background rounded-xl">
+          <div className="h-14 flex items-center px-4 border border-input bg-background rounded-xl text-base">
             <Loader size="sm" className="mr-2" /> Loading categories...
           </div>
         ) : (
           <select
             id="categoryId"
-            className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm font-normal outline-none transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            className="h-14 w-full rounded-xl border border-input bg-background px-4 text-base font-normal outline-none transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             {...register("categoryId", { required: "Category is required" })}>
             <option value="">Select a Category</option>
             {categories.map((category: any) => (
@@ -133,17 +137,17 @@ export function ProductForm({
         )}
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
           <input
             id="isVatApplicable"
             type="checkbox"
-            className="size-4 rounded border-input accent-primary"
+            className="size-5 rounded border-input accent-primary cursor-pointer"
             {...register("isVatApplicable")}
           />
           <label
             htmlFor="isVatApplicable"
-            className="text-sm font-medium text-foreground">
+            className="text-base font-semibold text-foreground cursor-pointer select-none">
             VAT Applicable
           </label>
         </div>
@@ -152,12 +156,12 @@ export function ProductForm({
           <input
             id="isActive"
             type="checkbox"
-            className="size-4 rounded border-input accent-primary"
+            className="size-5 rounded border-input accent-primary cursor-pointer"
             {...register("isActive")}
           />
           <label
             htmlFor="isActive"
-            className="text-sm font-medium text-foreground">
+            className="text-base font-semibold text-foreground cursor-pointer select-none">
             Active
           </label>
         </div>
@@ -166,9 +170,12 @@ export function ProductForm({
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
-        {isLoading && <Loader size="sm" />}
-        {submitLabel}
+        className="w-full h-14 rounded-xl bg-primary text-primary-foreground text-lg font-extrabold hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer">
+        {isLoading ? (
+          <Loader size="sm" text="Saving..." className="animate-pulse" />
+        ) : (
+          submitLabel
+        )}
       </button>
     </form>
   );
