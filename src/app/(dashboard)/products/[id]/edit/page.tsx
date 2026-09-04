@@ -30,15 +30,27 @@ export default function EditProductPage() {
   const formattedDefaultValues: Partial<ProductFormValues> = {
     name: product?.name,
     slug: product?.slug,
+    description: product?.description || "",
     pack: product?.pack,
     price: product?.price,
     categoryId:
       typeof product?.categoryId === "object"
         ? product?.categoryId?._id
         : product?.categoryId,
+    relatedProducts: Array.isArray(product?.relatedProducts)
+      ? product?.relatedProducts?.map((p: any) =>
+          typeof p === "object" ? p?._id : p,
+        )
+      : [],
     isVatApplicable: product?.isVatApplicable,
     isActive: product?.isActive,
   };
+
+  const initialRelatedOptions = Array.isArray(product?.relatedProducts)
+    ? product?.relatedProducts
+        ?.filter((p: any) => typeof p === "object" && p?._id && p?.name)
+        ?.map((p: any) => ({ value: p._id, label: p.name }))
+    : [];
 
   return (
     <QueryBoundary
@@ -54,10 +66,12 @@ export default function EditProductPage() {
         backHref={`${ROUTES.PRODUCTS}/${id}`}
       />
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
-        <div className="w-full max-w-xl">
+        <div className="w-full max-w-4xl">
           <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
             <ProductForm
               defaultValues={formattedDefaultValues}
+              initialRelatedOptions={initialRelatedOptions}
+              currentProductId={id || product?._id}
               onSubmit={handleSubmit}
               isLoading={isPending}
               submitLabel="Save Changes"

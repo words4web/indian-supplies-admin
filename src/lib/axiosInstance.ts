@@ -62,36 +62,71 @@ axiosInstance.interceptors.response.use(
       typeof window !== "undefined" &&
       window.location.pathname === ROUTES.LOGIN;
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      !isAuthPage
-    ) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return axiosInstance(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
+    if (error.response?.status === 401) {
+      if (isAuthPage) {
+        store.dispatch(clearAuth());
+        return Promise.reject(error);
       }
 
-      originalRequest._retry = true;
-      isRefreshing = true;
+      if (!originalRequest._retry) {
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          })
+            .then((token) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              return axiosInstance(originalRequest);
+            })
+            .catch((err) => Promise.reject(err));
+        }
 
-      const isAuthEndpoint =
-        originalRequest?.url?.includes(API_ROUTES.AUTH.LOGIN) ||
-        originalRequest?.url?.includes(API_ROUTES.AUTH.REFRESH_TOKEN) ||
-        originalRequest?.url?.includes(API_ROUTES.AUTH.LOGOUT);
+        originalRequest._retry = true;
+        isRefreshing = true;
 
-      if (isAuthEndpoint) {
-        isRefreshing = false;
-        const isLogoutRequest = originalRequest?.url?.includes(
-          API_ROUTES.AUTH.LOGOUT,
-        );
-        if (!isLogoutRequest) {
+        const isAuthEndpoint =
+          originalRequest?.url?.includes(API_ROUTES.AUTH.LOGIN) ||
+          originalRequest?.url?.includes(API_ROUTES.AUTH.REFRESH_TOKEN) ||
+          originalRequest?.url?.includes(API_ROUTES.AUTH.LOGOUT);
+
+        if (isAuthEndpoint) {
+          isRefreshing = false;
+          const isLogoutRequest = originalRequest?.url?.includes(
+            API_ROUTES.AUTH.LOGOUT,
+          );
+          if (!isLogoutRequest) {
+            store.dispatch(clearAuth());
+            if (typeof window !== "undefined") {
+              const currentPath = window.location.pathname;
+              if (currentPath !== ROUTES.LOGIN) {
+                window.location.href = ROUTES.LOGIN;
+              }
+            }
+          }
+          return Promise.reject(error);
+        }
+
+        try {
+          const response = await axios.post(
+            `${API_BASE_URL}${API_ROUTES.AUTH.REFRESH_TOKEN}`,
+            {},
+            {
+              timeout: 30000,
+              withCredentials: true,
+            },
+          );
+
+          const newAccessToken = response.data?.data?.accessToken;
+
+          if (newAccessToken) {
+            store.dispatch(setAccessToken(newAccessToken));
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            processQueue(null, newAccessToken);
+            return axiosInstance(originalRequest);
+          } else {
+            throw new Error("New access token not found in refresh response");
+          }
+        } catch (refreshError) {
+          processQueue(refreshError, null);
           store.dispatch(clearAuth());
           if (typeof window !== "undefined") {
             const currentPath = window.location.pathname;
@@ -99,42 +134,10 @@ axiosInstance.interceptors.response.use(
               window.location.href = ROUTES.LOGIN;
             }
           }
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
         }
-        return Promise.reject(error);
-      }
-
-      try {
-        const response = await axios.post(
-          `${API_BASE_URL}${API_ROUTES.AUTH.REFRESH_TOKEN}`,
-          {},
-          {
-            timeout: 30000,
-            withCredentials: true,
-          },
-        );
-
-        const newAccessToken = response.data?.data?.accessToken;
-
-        if (newAccessToken) {
-          store.dispatch(setAccessToken(newAccessToken));
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          processQueue(null, newAccessToken);
-          return axiosInstance(originalRequest);
-        } else {
-          throw new Error("New access token not found in refresh response");
-        }
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        store.dispatch(clearAuth());
-        if (typeof window !== "undefined") {
-          const currentPath = window.location.pathname;
-          if (currentPath !== ROUTES.LOGIN) {
-            window.location.href = ROUTES.LOGIN;
-          }
-        }
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
     }
 

@@ -72,6 +72,17 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
 
+                {product?.description && (
+                  <div className="flex flex-col gap-1.5 pt-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      Description
+                    </span>
+                    <p className="text-sm font-normal text-foreground bg-muted/40 p-4 rounded-xl border border-border/30 whitespace-pre-wrap">
+                      {product.description}
+                    </p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
                   <div>
                     <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">

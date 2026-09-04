@@ -26,8 +26,8 @@ export default function NewProductPage() {
         backHref={ROUTES.PRODUCTS}
       />
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
-        <div className="w-full max-w-lg">
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <div className="w-full max-w-4xl">
+          <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
             <ProductForm
               onSubmit={handleSubmit}
               isLoading={isPending}

@@ -35,7 +35,10 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 │   └── layout.tsx            # Root layout configuring Query & Redux providers
 │
 ├── components/               # React Components
-│   ├── common/               # Shared dashboard components (Input, ConfirmModal)
+│   ├── common/               # Shared dashboard components (Input, ConfirmModal, PaginatedDropdown)
+│   │   └── PaginatedDropdown # Multi-select search & paginated dropdown component
+│   ├── product/              # Product domain components
+│   │   └── ProductForm       # 2-column grid product form with description & related products picker
 │   └── ui/                   # Low-level UI primitives (e.g. Button component)
 │
 ├── constants/                # App Constants
@@ -43,7 +46,8 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 │   └── routes.ts             # App router routing definitions (protected & guest)
 │
 ├── hooks/                    # Reusable Custom React Hooks
-│   └── useAuth.ts            # Authentication profile queries & status utilities
+│   ├── useAuth.ts            # Authentication profile queries & status utilities
+│   └── useDebounce.ts        # Input debouncing hook for dropdown search
 │
 ├── lib/                      # Core integration utilities
 │   ├── store/                # Redux slices configuration (authSlice.ts)
@@ -67,6 +71,7 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 └── types/                    # Core TypeScript Interfaces
     ├── address.types.ts      # AddressPayload definitions
     ├── common.types.ts       # Shared payload definitions (e.g. SocketToastPayload)
+    ├── product/              # Product domain types (ProductRow, ProductPayload, ProductFormValues)
     └── auth/                 # Authentication payload schemas
 ```
 
