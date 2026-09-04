@@ -51,13 +51,22 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 │   ├── store.ts              # Redux store configurations & persist setup
 │   └── format.ts             # Currency and numeric format helpers
 │
+├── listeners/                # Socket & Event Listener Subscriptions
+│   └── socket/               # Modular Socket.io listeners
+│       ├── index.ts          # Central socket listener registration
+│       ├── toast.listener.ts  # Real-time toast notifications
+│       ├── order.listener.ts  # Real-time order status updates & query invalidations
+│       └── product.listener.ts# Real-time product inventory updates & query invalidations
+│
 ├── providers/                # Context & Injection Providers
 │   ├── auth-initializer.tsx  # Global Route Guard redirect handler
 │   ├── query-provider.tsx    # Tanstack React Query context injection
-│   └── redux-provider.tsx    # Redux Store wrapper injection
+│   ├── redux-provider.tsx    # Redux Store wrapper injection
+│   └── socket-provider.tsx   # Socket.io connection manager & listener initializer
 │
 └── types/                    # Core TypeScript Interfaces
     ├── address.types.ts      # AddressPayload definitions
+    ├── common.types.ts       # Shared payload definitions (e.g. SocketToastPayload)
     └── auth/                 # Authentication payload schemas
 ```
 
@@ -71,7 +80,18 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 
 ---
 
-## 5. Dashboard Routing
+## 5. Real-Time WebSockets Integration (Socket.io)
+
+- **Provider**: Handled via [SocketProvider](file:///home/mazahir/projects/work/Indian%20Supplies/admin/src/providers/socket-provider.tsx), which connects to the backend Socket server when authenticated and handles reconnection logic automatically.
+- **Modular Listeners**: Socket event handling is modularized under `src/listeners/socket/`:
+  - `toast.listener.ts`: Subscribes to notification/toast events and triggers UI alerts.
+  - `order.listener.ts`: Listens for order placement/status updates and invalidates relevant TanStack React Query keys (e.g. orders list/detail cache).
+  - `product.listener.ts`: Listens for product catalog changes and triggers cache revalidation.
+- **Query Invalidation**: Received socket events automatically call `queryClient.invalidateQueries()` for instant UI state synchronization without requiring full manual re-fetching.
+
+---
+
+## 6. Dashboard Routing
 
 Located in [routes.ts](file:///home/mazahir/projects/work/Indian%20Supplies/admin/src/constants/routes.ts):
 

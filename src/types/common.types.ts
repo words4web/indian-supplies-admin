@@ -19,3 +19,8 @@ export interface SidebarProps {
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
 }
+
+export interface SocketToastPayload {
+  message: string;
+  type?: "info" | "success" | "warning" | "error";
+}
