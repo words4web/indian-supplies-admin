@@ -50,18 +50,12 @@ export default function OrdersPage() {
       header: "Status",
       render: (row) => {
         const statusColors: Record<string, string> = {
-          PENDING_REVIEW: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-          APPROVED: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-          DISPATCHED: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-          DELIVERED: "bg-zinc-500/10 text-zinc-600 border-zinc-500/20",
-          CANCELLED: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+          IN_PROCESS: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+          DELIVERED: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
         };
         const statusLabels: Record<string, string> = {
-          PENDING_REVIEW: "Pending Review",
-          APPROVED: "Approved",
-          DISPATCHED: "Dispatched",
+          IN_PROCESS: "In Process",
           DELIVERED: "Delivered",
-          CANCELLED: "Cancelled",
         };
         return (
           <span

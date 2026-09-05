@@ -10,5 +10,12 @@ export const orderService = {
     const response = await axiosInstance.get(API_ROUTES.ORDERS.DETAIL(id));
     return response.data;
   },
+  updateStatus: async (id: string, status: string) => {
+    const response = await axiosInstance.patch(
+      API_ROUTES.ORDERS.UPDATE_STATUS(id),
+      { status },
+    );
+    return response.data;
+  },
 };
 export default orderService;

@@ -6,7 +6,7 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 
 ## 1. Project Overview
 
-**Indian Supplies Admin** is the administrative portal for the Indian Supplies wholesale ordering platform. It enables administrators to manage retailer accounts, monitor active orders, update product catalogs, and configure platform settings.
+**Indian Supplies Admin** is the administrative portal for the Indian Supplies wholesale ordering platform. It enables administrators to manage retailer accounts, monitor active orders, update product & category catalogs, and configure platform settings.
 
 ---
 
@@ -15,7 +15,7 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 - **Framework**: Next.js 16.3.0 (using App Router & Turbopack)
 - **Runtime**: React 19 & React DOM 19
 - **State Management**: Redux Toolkit & Redux Persist (Session Storage)
-- **Data Fetching & Cache**: Tanstack React Query (`@tanstack/react-query`)
+- **Data Fetching & Cache**: TanStack React Query (`@tanstack/react-query`)
 - **API Client**: Axios (configured with token refresh interceptors)
 - **Styling**: Tailwind CSS 4.3.3 + PostCSS
 - **Language**: TypeScript 5.7.3
@@ -29,17 +29,26 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 │   ├── (auth)/               # Guest authentication views
 │   │   └── login/            # Admin email/password login page
 │   ├── (dashboard)/          # Protected admin panel pages
+│   │   ├── categories/       # Category management (list, new, edit)
+│   │   │   ├── [id]/         # Category details view
+│   │   │   │   └── edit/     # Edit category page
+│   │   │   ├── new/          # Create category page
+│   │   │   └── page.tsx      # Categories table list
+│   │   ├── orders/           # Order management (list, details)
+│   │   ├── products/         # Product management (list, new, edit)
 │   │   ├── layout.tsx        # Dashboard layout with Sidebar & Header
 │   │   └── page.tsx          # Overview / Dashboard metrics page
 │   ├── globals.css           # Global Tailwind and base styles
 │   └── layout.tsx            # Root layout configuring Query & Redux providers
 │
 ├── components/               # React Components
+│   ├── category/             # Category domain components (CategoryForm, etc.)
 │   ├── common/               # Shared dashboard components (Input, ConfirmModal, PaginatedDropdown)
 │   │   └── PaginatedDropdown # Multi-select search & paginated dropdown component
+│   ├── order/                # Order status handlers & modal details
 │   ├── product/              # Product domain components
 │   │   └── ProductForm       # 2-column grid product form with description & related products picker
-│   └── ui/                   # Low-level UI primitives (e.g. Button component)
+│   └── ui/                   # Low-level UI primitives (Button, etc.)
 │
 ├── constants/                # App Constants
 │   ├── api.ts                # Backend API routes mapping
@@ -68,8 +77,15 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 │   ├── redux-provider.tsx    # Redux Store wrapper injection
 │   └── socket-provider.tsx   # Socket.io connection manager & listener initializer
 │
+├── services/                 # Service & React Query hooks
+│   ├── category/             # Category API service & hooks
+│   ├── order/                # Order API service & hooks
+│   ├── product/              # Product API service & hooks
+│   └── user/                 # User API service & hooks
+│
 └── types/                    # Core TypeScript Interfaces
     ├── address.types.ts      # AddressPayload definitions
+    ├── category.types.ts     # Category schema & payload definitions
     ├── common.types.ts       # Shared payload definitions (e.g. SocketToastPayload)
     ├── product/              # Product domain types (ProductRow, ProductPayload, ProductFormValues)
     └── auth/                 # Authentication payload schemas
@@ -79,20 +95,19 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 
 ## 4. State Management & Authentication
 
-- **Redux Persist**: Persistent token-based session management. The access token and authenticated user payload are stored in the browser's `sessionStorage` using the key `auth`.
-- **Token-Based Sessions**: Requests include the `Authorization: Bearer <accessToken>` header. On expiration (401), the Axios interceptor in [axiosInstance.ts](file:///home/mazahir/projects/work/Indian%20Supplies/admin/src/lib/axiosInstance.ts) automatically queues failed requests and performs a refresh request using the backend cookie token before retrying.
-- **Login Flow**: Standard login via Email and Password directly communicating with `/api/v1/admin/auth/login`.
+- **Redux Persist**: Persistent token-based session management. Access token and authenticated user payload are stored in browser `sessionStorage` under `auth`.
+- **Token-Based Sessions**: Requests include the `Authorization: Bearer <accessToken>` header. On expiration (401), the Axios interceptor in `src/lib/axiosInstance.ts` queues failed requests and performs a refresh request using the backend cookie token before retrying.
+- **Login Flow**: Login via Email and Password directly communicating with `/api/v1/admin/auth/login`.
 
 ---
 
 ## 5. Real-Time WebSockets Integration (Socket.io)
 
-- **Provider**: Handled via [SocketProvider](file:///home/mazahir/projects/work/Indian%20Supplies/admin/src/providers/socket-provider.tsx), which connects to the backend Socket server when authenticated and handles reconnection logic automatically.
-- **Modular Listeners**: Socket event handling is modularized under `src/listeners/socket/`:
+- **Provider**: Handled via [SocketProvider](file:///home/mazahir/projects/work/Indian%20Supplies/admin/src/providers/socket-provider.tsx), connecting to the backend Socket server when authenticated.
+- **Modular Listeners**: Located under `src/listeners/socket/`:
   - `toast.listener.ts`: Subscribes to notification/toast events and triggers UI alerts.
-  - `order.listener.ts`: Listens for order placement/status updates and invalidates relevant TanStack React Query keys (e.g. orders list/detail cache).
+  - `order.listener.ts`: Listens for order placement/status updates and invalidates relevant React Query keys.
   - `product.listener.ts`: Listens for product catalog changes and triggers cache revalidation.
-- **Query Invalidation**: Received socket events automatically call `queryClient.invalidateQueries()` for instant UI state synchronization without requiring full manual re-fetching.
 
 ---
 
@@ -101,10 +116,11 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 Located in [routes.ts](file:///home/mazahir/projects/work/Indian%20Supplies/admin/src/constants/routes.ts):
 
 - **Protected Routes**:
-  - `ROUTES.HOME` (`/` - Overview Dashboard metrics)
-  - `ROUTES.ORDERS` (`/orders` - Order management)
-  - `ROUTES.PRODUCTS` (`/products` - Catalog configuration)
-  - `ROUTES.USERS` (`/users` - Retailer verification)
-  - `ROUTES.SETTINGS` (`/settings` - App preferences)
+  - `ROUTES.HOME` (`/`)
+  - `ROUTES.ORDERS` (`/orders`)
+  - `ROUTES.PRODUCTS` (`/products`)
+  - `ROUTES.CATEGORIES` (`/categories`)
+  - `ROUTES.USERS` (`/users`)
+  - `ROUTES.SETTINGS` (`/settings`)
 - **Guest Routes**:
-  - `ROUTES.LOGIN` (`/login` - Console Access Login)
+  - `ROUTES.LOGIN` (`/login`)

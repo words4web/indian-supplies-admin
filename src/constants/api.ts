@@ -22,5 +22,6 @@ export const API_ROUTES = {
   ORDERS: {
     LIST: "/admin/orders",
     DETAIL: (id: string) => `/admin/orders/${id}`,
+    UPDATE_STATUS: (id: string) => `/admin/orders/${id}/status`,
   },
 };

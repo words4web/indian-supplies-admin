@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { io, Socket } from "socket.io-client";
 import { RootState } from "@/lib/store";
 import { API_BASE_URL } from "@/lib/axiosInstance";
@@ -30,6 +31,7 @@ export const useSocket = () => useContext(SocketContext);
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const socketRef = useRef<Socket | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -45,7 +47,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     newSocket.on("connect", () => {
       setIsConnected(true);
-      registerAllSocketListeners(newSocket, queryClient);
+      registerAllSocketListeners(newSocket, queryClient, router);
     });
 
     newSocket.on("disconnect", () => {

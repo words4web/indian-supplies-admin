@@ -5,7 +5,10 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/common/Loader";
 import { ErrorView } from "@/components/common/ErrorView";
-import { useAdminOrderDetailQuery } from "@/services/order/order.hook";
+import {
+  useAdminOrderDetailQuery,
+  useUpdateOrderStatusMutation,
+} from "@/services/order/order.hook";
 import { formatPounds } from "@/lib/format";
 
 export default function OrderDetailPage() {
@@ -20,6 +23,8 @@ export default function OrderDetailPage() {
     error,
     refetch,
   } = useAdminOrderDetailQuery(orderId);
+
+  const updateStatusMutation = useUpdateOrderStatusMutation();
 
   const order = responseBody?.data;
 
@@ -55,19 +60,13 @@ export default function OrderDetailPage() {
     ) || 0;
 
   const statusColors: Record<string, string> = {
-    PENDING_REVIEW: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-    APPROVED: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-    DISPATCHED: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-    DELIVERED: "bg-zinc-500/10 text-zinc-600 border-zinc-500/20",
-    CANCELLED: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+    IN_PROCESS: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    DELIVERED: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
   };
 
   const statusLabels: Record<string, string> = {
-    PENDING_REVIEW: "Pending Review",
-    APPROVED: "Approved",
-    DISPATCHED: "Dispatched",
+    IN_PROCESS: "In Process",
     DELIVERED: "Delivered",
-    CANCELLED: "Cancelled",
   };
 
   return (
@@ -106,9 +105,43 @@ export default function OrderDetailPage() {
             })}
           </p>
         </div>
-        <p className="font-serif text-3xl font-extrabold text-primary">
-          {formatPounds(order.total)}
-        </p>
+        <div className="flex items-center gap-3">
+          {order.status !== "DELIVERED" ? (
+            <Button
+              size="sm"
+              disabled={updateStatusMutation.isPending}
+              onClick={() =>
+                updateStatusMutation.mutate({
+                  id: order._id,
+                  status: "DELIVERED",
+                })
+              }
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+              {updateStatusMutation.isPending
+                ? "Updating…"
+                : "Mark as Delivered"}
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={updateStatusMutation.isPending}
+              onClick={() =>
+                updateStatusMutation.mutate({
+                  id: order._id,
+                  status: "IN_PROCESS",
+                })
+              }
+              className="font-semibold">
+              {updateStatusMutation.isPending
+                ? "Updating…"
+                : "Mark as In Process"}
+            </Button>
+          )}
+          <p className="font-serif text-3xl font-extrabold text-primary ml-2">
+            {formatPounds(order.total)}
+          </p>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
