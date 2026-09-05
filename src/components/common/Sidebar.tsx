@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { NAVIGATION_ITEMS, BOTTOM_NAVIGATION_ITEMS } from "@/data/navigation";
@@ -28,7 +29,14 @@ export function Sidebar({
 
         <div className="relative flex w-full max-w-xs flex-1 flex-col bg-card border-r border-border p-6 transition-transform duration-300 transform">
           <div className="flex items-center justify-between">
-            <div className="flex items-center text-primary font-bold">
+            <div className="flex items-center gap-2.5 text-primary font-bold">
+              <Image
+                src="/logo.png"
+                alt="Indian Supplies Logo"
+                width={32}
+                height={32}
+                className="size-8 rounded-lg object-contain"
+              />
               <span className="font-serif text-lg">Indian Supplies</span>
             </div>
             <Button
@@ -85,13 +93,20 @@ export function Sidebar({
         className={`hidden md:fixed md:inset-y-0 md:flex md:flex-col bg-card border-r border-border transition-all duration-300 ${isCollapsed ? "md:w-20" : "md:w-56"}`}>
         <div
           className={`flex h-16 items-center justify-between border-b border-border px-4 text-primary font-bold ${isCollapsed ? "justify-center" : ""}`}>
-          {!isCollapsed && (
-            <div className="flex items-center">
-              <span className="font-serif text-lg tracking-wide">
+          <div className="flex items-center gap-2.5">
+            <Image
+              src="/logo.png"
+              alt="Indian Supplies Logo"
+              width={32}
+              height={32}
+              className="size-8 rounded-lg object-contain shrink-0"
+            />
+            {!isCollapsed && (
+              <span className="font-serif text-lg tracking-wide truncate">
                 Indian Supplies
               </span>
-            </div>
-          )}
+            )}
+          </div>
           <Button
             variant="outline"
             size="icon"

@@ -4,6 +4,7 @@ import { ReduxProvider } from "@/providers/redux-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { SocketProvider } from "@/providers/socket-provider";
 import { Toaster } from "sonner";
+import { AdminNotificationListener } from "@/components/common/AdminNotificationListener";
 import "./globals.css";
 
 const geistSans = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
@@ -42,7 +43,10 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ReduxProvider>
           <QueryProvider>
-            <SocketProvider>{children}</SocketProvider>
+            <SocketProvider>
+              <AdminNotificationListener />
+              {children}
+            </SocketProvider>
           </QueryProvider>
         </ReduxProvider>
         <Toaster position="top-right" richColors />

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { ROUTES } from "@/constants/routes";
 import { Button } from "@/components/ui/button";
+import { AdminNotificationToggle } from "@/components/common/AdminNotificationToggle";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { LogOut, User as UserIcon, Mail, ShieldAlert } from "lucide-react";
 
@@ -20,15 +21,18 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-8 w-full">
+    <div className="space-y-8 w-full max-w-4xl">
       <div>
         <h1 className="font-serif text-3xl font-extrabold tracking-tight text-foreground">
           Settings & Profile
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Manage your administrator profile settings and dashboard session.
+          Manage your administrator profile settings, notifications, and
+          dashboard session.
         </p>
       </div>
+
+      <AdminNotificationToggle />
 
       <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-6">
         <div className="flex items-center justify-between pb-4 border-b border-border flex-wrap gap-4">

@@ -24,4 +24,8 @@ export const API_ROUTES = {
     DETAIL: (id: string) => `/admin/orders/${id}`,
     UPDATE_STATUS: (id: string) => `/admin/orders/${id}/status`,
   },
+  USERS: {
+    LIST: "/admin/users",
+    DETAIL: (id: string) => `/admin/users/${id}`,
+  },
 };

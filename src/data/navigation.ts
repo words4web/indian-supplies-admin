@@ -5,6 +5,7 @@ import {
   Package,
   Tag,
   Users,
+  Bell,
   Settings,
 } from "lucide-react";
 
@@ -13,6 +14,7 @@ export const NAVIGATION_ITEMS = [
   { name: "Categories", href: ROUTES.CATEGORIES, icon: Tag },
   { name: "Products", href: ROUTES.PRODUCTS, icon: Package },
   { name: "Orders", href: ROUTES.ORDERS, icon: ShoppingBag },
+  { name: "Notifications", href: ROUTES.NOTIFICATIONS, icon: Bell },
   { name: "Users", href: ROUTES.USERS, icon: Users },
 ];
 
