@@ -3,7 +3,7 @@ const currency = new Intl.NumberFormat("en-GB", {
   currency: "GBP",
 });
 
-export function formatPrice(value: number | null): string {
+export function formatPrice(value: number | null | undefined): string {
   if (value == null) return "POA";
   return currency.format(value);
 }

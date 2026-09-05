@@ -48,3 +48,45 @@ export interface OrderConfirmation {
   total: number;
   delivery: DeliveryDetails;
 }
+
+export interface OrderHeaderProps {
+  orderId?: string;
+  createdAt?: string;
+  status?: string;
+  total?: number;
+  isDelivered: boolean;
+  isUpdating: boolean;
+  onUpdateStatus: (status: "DELIVERED" | "IN_PROCESS") => void;
+}
+
+export interface OrderCustomerDetailsProps {
+  delivery?: {
+    contactPerson?: string;
+    businessName?: string;
+    phone?: string;
+    address?: string;
+    notes?: string;
+  };
+  userId?: {
+    name?: string;
+    business?: string;
+    email?: string;
+    phone?: string;
+  };
+}
+
+export interface OrderItemsTableProps {
+  items: Array<{
+    productId?: {
+      _id?: string;
+      name?: string;
+      slug?: string;
+      pack?: string;
+    };
+    quantity: number;
+    priceAtOrder: number;
+  }>;
+  subtotal?: number;
+  vat?: number;
+  total?: number;
+}

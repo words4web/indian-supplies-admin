@@ -106,7 +106,7 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 - **Provider**: Handled via [SocketProvider](file:///home/mazahir/projects/work/Indian%20Supplies/admin/src/providers/socket-provider.tsx), connecting to the backend Socket server when authenticated.
 - **Modular Listeners**: Located under `src/listeners/socket/`:
   - `toast.listener.ts`: Subscribes to notification/toast events and triggers UI alerts.
-  - `order.listener.ts`: Listens for order placement/status updates and invalidates relevant React Query keys.
+  - `order.listener.ts`: Listens for order placement (`order:created` with `_id`), displaying interactive Sonner toasts with action redirect button to `/orders?id=<_id>`, and invalidates order queries.
   - `product.listener.ts`: Listens for product catalog changes and triggers cache revalidation.
 
 ---

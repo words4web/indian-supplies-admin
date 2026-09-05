@@ -9,7 +9,9 @@ import {
   useAdminOrderDetailQuery,
   useUpdateOrderStatusMutation,
 } from "@/services/order/order.hook";
-import { formatPounds } from "@/lib/format";
+import { OrderHeader } from "@/components/order/order-header";
+import { OrderCustomerDetails } from "@/components/order/order-customer-details";
+import { OrderItemsTable } from "@/components/order/order-items-table";
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -53,219 +55,44 @@ export default function OrderDetailPage() {
     );
   }
 
-  const totalItems =
-    order.items?.reduce(
-      (acc: number, item: any) => acc + (item.quantity || 0),
-      0,
-    ) || 0;
+  const isDelivered = order.status === "DELIVERED";
 
-  const statusColors: Record<string, string> = {
-    IN_PROCESS: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-    DELIVERED: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  };
-
-  const statusLabels: Record<string, string> = {
-    IN_PROCESS: "In Process",
-    DELIVERED: "Delivered",
+  const handleUpdateStatus = (newStatus: "DELIVERED" | "IN_PROCESS") => {
+    updateStatusMutation.mutate({
+      id: order._id,
+      status: newStatus,
+    });
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto animate-fade-in">
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
           onClick={() => router.push("/orders")}
-          className="inline-flex items-center gap-2 text-sm font-semibold -ml-2">
+          className="inline-flex items-center gap-2 text-sm font-semibold -ml-2 text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to orders
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
-        <div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground">
-              Order {order.orderId}
-            </h1>
-            <span
-              className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
-                statusColors[order.status] ||
-                "bg-secondary text-secondary-foreground"
-              }`}>
-              {statusLabels[order.status] || order.status}
-            </span>
-          </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Placed{" "}
-            {new Date(order.createdAt).toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {order.status !== "DELIVERED" ? (
-            <Button
-              size="sm"
-              disabled={updateStatusMutation.isPending}
-              onClick={() =>
-                updateStatusMutation.mutate({
-                  id: order._id,
-                  status: "DELIVERED",
-                })
-              }
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
-              {updateStatusMutation.isPending
-                ? "Updating…"
-                : "Mark as Delivered"}
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={updateStatusMutation.isPending}
-              onClick={() =>
-                updateStatusMutation.mutate({
-                  id: order._id,
-                  status: "IN_PROCESS",
-                })
-              }
-              className="font-semibold">
-              {updateStatusMutation.isPending
-                ? "Updating…"
-                : "Mark as In Process"}
-            </Button>
-          )}
-          <p className="font-serif text-3xl font-extrabold text-primary ml-2">
-            {formatPounds(order.total)}
-          </p>
-        </div>
-      </div>
+      <OrderHeader
+        orderId={order?.orderId}
+        createdAt={order?.createdAt}
+        status={order?.status}
+        total={order?.total}
+        isDelivered={isDelivered}
+        isUpdating={updateStatusMutation.isPending}
+        onUpdateStatus={handleUpdateStatus}
+      />
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-          <h2 className="font-serif text-xl font-bold text-foreground">
-            Customer & Business Details
-          </h2>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Contact Name</span>
-              <span className="font-semibold text-foreground">
-                {order.delivery?.contactPerson || order.userId?.name}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Business Name</span>
-              <span className="font-semibold text-foreground">
-                {order.delivery?.businessName ||
-                  order.userId?.business ||
-                  "Not Provided"}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Email Address</span>
-              <span className="font-semibold text-foreground">
-                {order.userId?.email}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Contact Phone</span>
-              <span className="font-semibold text-foreground">
-                {order.delivery?.phone || order.userId?.phone}
-              </span>
-            </div>
-          </div>
-        </div>
+      <OrderCustomerDetails delivery={order?.delivery} userId={order?.userId} />
 
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-          <h2 className="font-serif text-xl font-bold text-foreground">
-            Delivery Address
-          </h2>
-          <div className="space-y-2 text-sm">
-            <p className="font-medium text-foreground leading-relaxed">
-              {order.delivery?.address}
-            </p>
-            {order.delivery?.notes && (
-              <div className="mt-4 border-t border-border pt-4">
-                <p className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                  Delivery Notes
-                </p>
-                <p className="text-muted-foreground italic leading-relaxed">
-                  &ldquo;{order.delivery.notes}&rdquo;
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-border">
-          <h2 className="font-serif text-xl font-bold text-foreground">
-            Items Ordered ({totalItems})
-          </h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="bg-secondary/40 text-muted-foreground font-semibold">
-                <th className="px-6 py-3.5">Product Name</th>
-                <th className="px-6 py-3.5">Pack Size</th>
-                <th className="px-6 py-3.5 text-center">Quantity</th>
-                <th className="px-6 py-3.5 text-right">Price at Order</th>
-                <th className="px-6 py-3.5 text-right">Total Price</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {order.items?.map((item: any) => (
-                <tr
-                  key={item.productId?._id || item.productId}
-                  className="hover:bg-muted/10 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-foreground">
-                    {item.productId?.name || "Deleted Product"}
-                  </td>
-                  <td className="px-6 py-4 text-muted-foreground">
-                    {item.productId?.pack || "N/A"}
-                  </td>
-                  <td className="px-6 py-4 text-center font-bold">
-                    {item.quantity}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    {formatPounds(item.priceAtOrder)}
-                  </td>
-                  <td className="px-6 py-4 text-right font-semibold">
-                    {formatPounds((item.priceAtOrder || 0) * item.quantity)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="bg-secondary/30 p-6 flex flex-col items-end border-t border-border">
-          <div className="w-full max-w-xs space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-semibold text-foreground">
-                {formatPounds(order.subtotal)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">VAT (20%)</span>
-              <span className="font-semibold text-foreground">
-                {formatPounds(order.vat)}
-              </span>
-            </div>
-            <div className="flex justify-between border-t border-border/80 pt-2 text-base font-bold">
-              <span className="text-foreground">Estimated Total</span>
-              <span className="text-primary font-serif text-lg">
-                {formatPounds(order.total)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <OrderItemsTable
+        items={order?.items || []}
+        subtotal={order?.subtotal}
+        vat={order?.vat}
+        total={order?.total}
+      />
     </div>
   );
 }
