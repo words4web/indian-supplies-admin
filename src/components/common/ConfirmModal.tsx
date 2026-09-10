@@ -91,9 +91,7 @@ export function ConfirmModal({
           </Button>
         </div>
 
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          {description}
-        </p>
+        <p className="text-sm leading-relaxed ">{description}</p>
 
         <div className="mt-2 flex items-center justify-end gap-3">
           <Button variant="outline" onClick={onClose}>

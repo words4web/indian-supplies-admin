@@ -14,7 +14,7 @@ export default function NewProductPage() {
 
   const handleSubmit = (values: ProductFormValues) => {
     createProduct(values, {
-      onSuccess: () => router.push(ROUTES.PRODUCTS),
+      onSuccess: () => router.back(),
     });
   };
 
@@ -23,16 +23,19 @@ export default function NewProductPage() {
       <PageHeader
         title="New Product"
         subtitle="Create a new product listing"
-        backHref={ROUTES.PRODUCTS}
+        showBack={true}
+        action={{
+          label: "Create Product",
+          type: "submit",
+          form: "product-form",
+          variant: "default",
+          isLoading: isPending,
+        }}
       />
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
         <div className="w-full max-w-4xl">
           <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
-            <ProductForm
-              onSubmit={handleSubmit}
-              isLoading={isPending}
-              submitLabel="Create Product"
-            />
+            <ProductForm onSubmit={handleSubmit} />
           </div>
         </div>
       </div>

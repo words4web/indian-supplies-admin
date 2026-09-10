@@ -2,41 +2,54 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, Eye, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { useProducts, useDeleteProduct } from "@/services/product/product.hook";
+import { useCategories } from "@/services/category/category.hook";
 import { DataTable, TableColumn } from "@/components/common/DataTable";
 import { QueryBoundary } from "@/components/common/QueryBoundary";
 import { RowActions } from "@/components/common/RowActions";
 import { Pagination } from "@/components/common/Pagination";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
+import { PageFilters } from "@/components/common/PageFilters";
+import { PageHeader } from "@/components/common/PageHeader";
+import { useProductFilters } from "@/hooks/useProductFilters";
 import { ProductRow } from "@/types/product/product.types";
 import { ROUTES } from "@/constants/routes";
-import { useDebounce } from "@/hooks/useDebounce";
-import { PageHeader } from "@/components/common/PageHeader";
+
+const LIMIT = 10;
 
 export default function ProductsPage() {
   const router = useRouter();
-  const [page, setPage] = useState(1);
-  const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 350);
+  const { page, search, category, setSearch, setCategory, setPage, clearAll } =
+    useProductFilters();
   const [pendingDelete, setPendingDelete] = useState<ProductRow | null>(null);
-  const limit = 20;
 
-  const { data, isLoading, isError, error, refetch } = useProducts({
+  const { data: categoriesData, isLoading: isLoadingCategories } =
+    useCategories({ limit: 100, isActive: true });
+
+  const categoryOptions =
+    categoriesData?.data?.categories?.map((cat: any) => ({
+      value: cat?._id,
+      label: cat?.name,
+    })) || [];
+
+  const { data, isLoading, isFetching, isError, error, refetch } = useProducts({
     page,
-    limit,
-    search: debouncedQuery?.trim() || undefined,
+    limit: LIMIT,
+    search: search?.trim() || undefined,
+    categoryId: category || undefined,
   });
   const { mutate: deleteProduct } = useDeleteProduct();
 
   const products: ProductRow[] = data?.data?.products ?? [];
   const total: number = data?.data?.total ?? 0;
-  const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.ceil(total / LIMIT);
 
   const columns: TableColumn<ProductRow>[] = [
     {
       key: "name",
       header: "Name",
+      className: "w-2/5",
       render: (row) => (
         <span className="font-semibold text-foreground">{row?.name}</span>
       ),
@@ -44,6 +57,7 @@ export default function ProductsPage() {
     {
       key: "categoryId",
       header: "Category",
+      className: "w-1/5",
       render: (row) => {
         const cat =
           typeof row?.categoryId === "object" ? row?.categoryId?.name : "-";
@@ -55,6 +69,7 @@ export default function ProductsPage() {
     {
       key: "pack",
       header: "Pack Size",
+      className: "w-28",
       render: (row) => (
         <span className="text-sm text-foreground">{row?.pack}</span>
       ),
@@ -62,6 +77,7 @@ export default function ProductsPage() {
     {
       key: "price",
       header: "Price",
+      className: "w-28",
       render: (row) => (
         <span className="text-sm font-bold text-foreground">
           £{row?.price?.toFixed(2)}
@@ -71,6 +87,7 @@ export default function ProductsPage() {
     {
       key: "isActive",
       header: "Status",
+      className: "w-28",
       render: (row) => (
         <span
           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
@@ -90,7 +107,7 @@ export default function ProductsPage() {
     {
       key: "actions",
       header: "Actions",
-      className: "text-right w-12",
+      className: "text-right w-20",
       render: (row) => (
         <RowActions
           id={`actions-${row?._id}`}
@@ -130,32 +147,20 @@ export default function ProductsPage() {
         }}
       />
 
-      <div className="relative w-full max-w-md">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setPage(1);
-          }}
-          placeholder="Search products..."
-          className="h-10 w-full rounded-xl border border-input bg-card pl-9 pr-4 text-sm shadow-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary/20"
-        />
-        {query && (
-          <button
-            type="button"
-            onClick={() => {
-              setQuery("");
-              setPage(1);
-            }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-primary hover:underline cursor-pointer">
-            Clear
-          </button>
-        )}
-      </div>
+      <PageFilters
+        searchQuery={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search products by name..."
+        categoryValue={category}
+        onCategoryChange={setCategory}
+        categoryOptions={categoryOptions}
+        isLoadingCategories={isLoadingCategories}
+        onClearFilters={clearAll}
+        hasActiveFilters={!!search || !!category}
+      />
 
       <QueryBoundary
-        isLoading={isLoading}
+        isLoading={false}
         isError={isError}
         error={error}
         refetch={refetch}
@@ -164,10 +169,12 @@ export default function ProductsPage() {
         <DataTable
           columns={columns}
           data={products}
+          isLoading={isFetching}
+          skeletonCount={LIMIT}
           keyExtractor={(row) => row?._id}
           onRowClick={(row) => router.push(`${ROUTES.PRODUCTS}/${row?._id}`)}
           emptyMessage={
-            query
+            search
               ? "No products match your search query."
               : "No products found. Create your first one!"
           }
@@ -177,6 +184,7 @@ export default function ProductsPage() {
           page={page}
           totalPages={totalPages}
           onPageChange={setPage}
+          isLoading={isFetching}
         />
       </QueryBoundary>
 

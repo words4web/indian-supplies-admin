@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ReduxProvider } from "@/providers/redux-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { SocketProvider } from "@/providers/socket-provider";
@@ -41,14 +42,16 @@ export default function RootLayout({
       lang="en"
       className={`bg-background ${geistSans.variable} ${geistMono.variable} ${jakarta.variable}`}>
       <body className="font-sans antialiased">
-        <ReduxProvider>
-          <QueryProvider>
-            <SocketProvider>
-              <AdminNotificationListener />
-              {children}
-            </SocketProvider>
-          </QueryProvider>
-        </ReduxProvider>
+        <NuqsAdapter>
+          <ReduxProvider>
+            <QueryProvider>
+              <SocketProvider>
+                <AdminNotificationListener />
+                {children}
+              </SocketProvider>
+            </QueryProvider>
+          </ReduxProvider>
+        </NuqsAdapter>
         <Toaster position="top-right" richColors />
       </body>
     </html>

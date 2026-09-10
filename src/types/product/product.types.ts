@@ -1,4 +1,5 @@
 import { DropdownOption } from "@/components/common/PaginatedDropdown";
+import { EProductUnit } from "@/constants/product.constants";
 
 export interface RelatedProductItem {
   _id: string;
@@ -7,6 +8,7 @@ export interface RelatedProductItem {
   description?: string;
   pack?: string;
   price?: number;
+  unit?: EProductUnit;
 }
 
 export interface ProductRow {
@@ -16,12 +18,14 @@ export interface ProductRow {
   description?: string;
   pack: string;
   price: number;
+  unit: EProductUnit;
   categoryId:
     | {
         _id: string;
         name: string;
       }
     | string;
+  keywords?: string[];
   relatedProducts?: RelatedProductItem[] | string[];
   isVatApplicable: boolean;
   isActive: boolean;
@@ -35,7 +39,9 @@ export interface ProductPayload {
   description?: string;
   pack: string;
   price: number;
+  unit: EProductUnit;
   categoryId: string;
+  keywords: string[];
   relatedProducts?: string[];
   isVatApplicable?: boolean;
   isActive?: boolean;
@@ -47,7 +53,9 @@ export interface ProductFormValues {
   description?: string;
   pack: string;
   price: number;
+  unit: EProductUnit;
   categoryId: string;
+  keywords: string[];
   relatedProducts: string[];
   isVatApplicable: boolean;
   isActive: boolean;
@@ -58,6 +66,5 @@ export interface ProductFormProps {
   initialRelatedOptions?: DropdownOption[];
   currentProductId?: string;
   onSubmit: (values: ProductFormValues) => void;
-  isLoading?: boolean;
-  submitLabel?: string;
+  onDirtyChange?: (isDirty: boolean) => void;
 }

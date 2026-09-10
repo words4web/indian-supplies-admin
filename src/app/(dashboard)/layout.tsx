@@ -38,7 +38,7 @@ export default function DashboardLayout({
 
   return (
     <AuthInitializer>
-      <div className="min-h-screen bg-background">
+      <div className="flex min-h-screen bg-background">
         <Sidebar
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
@@ -49,9 +49,8 @@ export default function DashboardLayout({
           setIsCollapsed={handleToggleCollapse}
         />
 
-        <div
-          className={`flex flex-col min-h-screen transition-all duration-300 ${isCollapsed ? "md:pl-20" : "md:pl-56"}`}>
-          <main className="flex-grow p-6 md:p-8">{children}</main>
+        <div className="flex-1 flex flex-col min-w-0 min-h-screen px-4">
+          <main className="flex-grow">{children}</main>
         </div>
       </div>
     </AuthInitializer>

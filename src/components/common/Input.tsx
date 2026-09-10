@@ -1,14 +1,26 @@
 import React, { forwardRef } from "react";
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "prefix"
+> {
   label?: string;
   error?: string;
   containerClassName?: string;
+  prefix?: React.ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { label, error, className = "", containerClassName = "", id, ...props },
+    {
+      label,
+      error,
+      className = "",
+      containerClassName = "",
+      id,
+      prefix,
+      ...props
+    },
     ref,
   ) => {
     return (
@@ -18,12 +30,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <input
-          ref={ref}
-          id={id}
-          className={`h-11 w-full rounded-xl border border-input bg-background px-3 text-sm font-normal outline-none transition-all placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
-          {...props}
-        />
+        <div className="relative flex items-center">
+          {prefix && (
+            <span className="absolute left-4 text-base font-semibold text-muted-foreground select-none pointer-events-none">
+              {prefix}
+            </span>
+          )}
+          <input
+            ref={ref}
+            id={id}
+            className={`h-11 w-full rounded-xl border border-input bg-background px-3 text-sm font-normal outline-none transition-all placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 ${
+              prefix ? "pl-8" : ""
+            } ${className}`}
+            {...props}
+          />
+        </div>
         {error && (
           <p
             className="text-xs font-semibold text-destructive mt-0.5"

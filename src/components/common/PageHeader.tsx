@@ -1,18 +1,28 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/common/Loader";
 
 interface PageHeaderAction {
   label: string;
   icon?: React.ReactNode;
-  onClick: () => void;
+  onClick?: () => void;
   id?: string;
+  type?: "button" | "submit";
+  form?: string;
+  disabled?: boolean;
+  variant?: "default" | "outline" | "secondary" | "destructive" | "ghost";
+  size?: "default" | "sm" | "lg";
+  isLoading?: boolean;
 }
 
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
   backHref?: string;
+  onBackClick?: () => void;
+  showBack?: boolean;
   action?: PageHeaderAction;
 }
 
@@ -20,20 +30,34 @@ export function PageHeader({
   title,
   subtitle,
   backHref,
+  onBackClick,
+  showBack,
   action,
 }: PageHeaderProps) {
   const router = useRouter();
 
+  const handleBack = () => {
+    if (onBackClick) {
+      onBackClick();
+    } else if (backHref) {
+      router.push(backHref);
+    } else {
+      router.back();
+    }
+  };
+
   return (
-    <div className="flex items-start justify-between gap-4 mb-6 w-full">
+    <div className="sticky top-0 z-30 flex items-center justify-between gap-4 py-4 mb-6 w-full bg-background/95 backdrop-blur-md">
       <div className="flex items-center gap-3">
-        {backHref && (
-          <button
+        {(backHref || onBackClick || showBack) && (
+          <Button
             id="page-header-back-btn"
-            onClick={() => router.push(backHref)}
-            className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground flex-shrink-0">
+            variant="ghost"
+            size="icon"
+            onClick={handleBack}
+            className="text-muted-foreground hover:bg-muted">
             <ArrowLeft className="size-5" />
-          </button>
+          </Button>
         )}
         <div>
           <h1 className="text-2xl font-bold text-foreground">{title}</h1>
@@ -44,13 +68,23 @@ export function PageHeader({
       </div>
       {action && (
         <div className="flex items-center gap-2 flex-shrink-0 pt-1">
-          <button
+          <Button
             id={action?.id}
+            type={action?.type || "button"}
+            form={action?.form}
             onClick={action?.onClick}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-border hover:bg-muted transition-colors text-sm font-medium cursor-pointer">
-            {action?.icon}
-            {action?.label}
-          </button>
+            disabled={action?.disabled || action?.isLoading}
+            variant={action?.variant || "outline"}
+            size={action?.size || "default"}>
+            {action?.isLoading ? (
+              <Loader size="sm" text="Saving..." className="animate-pulse" />
+            ) : (
+              <>
+                {action?.icon}
+                {action?.label}
+              </>
+            )}
+          </Button>
         </div>
       )}
     </div>

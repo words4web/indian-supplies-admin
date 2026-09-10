@@ -6,6 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function toSlug(value: string): string {
+  if (!value) return "";
   return value
     ?.toLowerCase()
     ?.trim()

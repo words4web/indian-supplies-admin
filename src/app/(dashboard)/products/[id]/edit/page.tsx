@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   useProductDetail,
@@ -9,6 +10,7 @@ import { ProductForm } from "@/components/product/ProductForm";
 import { ProductFormValues } from "@/types/product/product.types";
 import { QueryBoundary } from "@/components/common/QueryBoundary";
 import { PageHeader } from "@/components/common/PageHeader";
+import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { ROUTES } from "@/constants/routes";
 
 export default function EditProductPage() {
@@ -18,12 +20,50 @@ export default function EditProductPage() {
   const { data, isLoading, isError, error, refetch } = useProductDetail(id);
   const { mutate: updateProduct, isPending } = useUpdateProduct();
 
+  const [isFormDirty, setIsFormDirty] = useState(false);
+  const [showDiscardModal, setShowDiscardModal] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [pendingValues, setPendingValues] = useState<ProductFormValues | null>(
+    null,
+  );
+
   const product = data?.data;
 
-  const handleSubmit = (values: ProductFormValues) => {
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isFormDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isFormDirty]);
+
+  const handleBackClick = useCallback(() => {
+    if (isFormDirty) {
+      setShowDiscardModal(true);
+    } else {
+      router.back();
+    }
+  }, [isFormDirty, router]);
+
+  const handleConfirmDiscard = () => {
+    router.back();
+  };
+
+  const handleSubmitForm = (values: ProductFormValues) => {
+    setPendingValues(values);
+    setShowSaveModal(true);
+  };
+
+  const handleConfirmSave = () => {
+    if (!pendingValues) return;
     updateProduct(
-      { id, payload: values },
-      { onSuccess: () => router.push(ROUTES.PRODUCTS) },
+      { id, payload: pendingValues },
+      {
+        onSuccess: () => router.back(),
+      },
     );
   };
 
@@ -33,10 +73,12 @@ export default function EditProductPage() {
     description: product?.description || "",
     pack: product?.pack,
     price: product?.price,
+    unit: product?.unit,
     categoryId:
       typeof product?.categoryId === "object"
         ? product?.categoryId?._id
         : product?.categoryId,
+    keywords: Array.isArray(product?.keywords) ? product?.keywords : [],
     relatedProducts: Array.isArray(product?.relatedProducts)
       ? product?.relatedProducts?.map((p: any) =>
           typeof p === "object" ? p?._id : p,
@@ -63,7 +105,14 @@ export default function EditProductPage() {
       <PageHeader
         title="Edit Product"
         subtitle={product?.name}
-        backHref={`${ROUTES.PRODUCTS}/${id}`}
+        onBackClick={handleBackClick}
+        action={{
+          label: "Save Changes",
+          type: "submit",
+          form: "product-form",
+          variant: "default",
+          isLoading: isPending,
+        }}
       />
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
         <div className="w-full max-w-4xl">
@@ -72,13 +121,34 @@ export default function EditProductPage() {
               defaultValues={formattedDefaultValues}
               initialRelatedOptions={initialRelatedOptions}
               currentProductId={id || product?._id}
-              onSubmit={handleSubmit}
-              isLoading={isPending}
-              submitLabel="Save Changes"
+              onSubmit={handleSubmitForm}
+              onDirtyChange={setIsFormDirty}
             />
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showDiscardModal}
+        onClose={() => setShowDiscardModal(false)}
+        onConfirm={handleConfirmDiscard}
+        title="Discard Unsaved Changes?"
+        description="You have unsaved changes in this product form. Are you sure you want to leave without saving?"
+        confirmText="Discard Changes"
+        cancelText="Keep Editing"
+        variant="destructive"
+      />
+
+      <ConfirmModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        onConfirm={handleConfirmSave}
+        title="Save Changes?"
+        description="Are you sure you want to update this product's information?"
+        confirmText="Save Product"
+        cancelText="Cancel"
+        variant="default"
+      />
     </QueryBoundary>
   );
 }

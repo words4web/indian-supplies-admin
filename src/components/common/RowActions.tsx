@@ -56,7 +56,11 @@ export function RowActions({ actions, id }: RowActionsProps) {
           ref={btnRef}
           id={id}
           onClick={handleToggle}
-          className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground cursor-pointer"
+          className={`p-2 rounded-lg hover:bg-muted transition-all duration-150 text-muted-foreground hover:text-foreground cursor-pointer ${
+            open
+              ? "opacity-100 bg-muted text-foreground"
+              : "opacity-0 group-hover:opacity-100"
+          }`}
           title="Actions">
           <MoreHorizontal className="size-4" />
         </button>

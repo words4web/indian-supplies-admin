@@ -26,7 +26,7 @@ export default function ProductDetailPage() {
         <PageHeader
           title={product?.name}
           subtitle="View product information details"
-          backHref={ROUTES.PRODUCTS}
+          showBack={true}
           action={{
             id: "edit-product-btn",
             label: "Edit Product",

@@ -1,7 +1,12 @@
-import { useEffect, useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/common/Input";
+import { Select } from "@/components/common/Select";
+import { Textarea } from "@/components/common/Textarea";
+import { CheckboxCard } from "@/components/common/CheckboxCard";
+import { KeywordsInput } from "@/components/common/KeywordsInput";
 import { Loader } from "@/components/common/Loader";
+import { FormSection } from "@/components/common/FormSection";
 import { useCategories } from "@/services/category/category.hook";
 import { productService } from "@/services/product/product.service";
 import {
@@ -13,22 +18,21 @@ import {
   ProductFormValues,
 } from "@/types/product/product.types";
 import { toSlug } from "@/lib/utils";
+import { EProductUnit } from "@/constants/product.constants";
 
 export function ProductForm({
   defaultValues,
   initialRelatedOptions,
   currentProductId,
   onSubmit,
-  isLoading,
-  submitLabel = "Save",
+  onDirtyChange,
 }: ProductFormProps) {
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
     control,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<ProductFormValues>({
     defaultValues: {
       name: "",
@@ -36,7 +40,9 @@ export function ProductForm({
       description: "",
       pack: "",
       price: 0,
+      unit: EProductUnit.CASE,
       categoryId: "",
+      keywords: [],
       relatedProducts: [],
       isVatApplicable: false,
       isActive: true,
@@ -44,21 +50,16 @@ export function ProductForm({
     },
   });
 
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
+
   const { data: categoriesData, isLoading: isLoadingCategories } =
     useCategories({
       limit: 100,
       isActive: true,
     });
   const categories = categoriesData?.data?.categories || [];
-
-  const nameValue = watch("name");
-  const isEditing = !!defaultValues?.slug;
-
-  useEffect(() => {
-    if (!isEditing) {
-      setValue("slug", toSlug(nameValue || ""), { shouldValidate: false });
-    }
-  }, [nameValue, isEditing, setValue]);
 
   const fetchProductsOptions = useCallback(
     async ({
@@ -89,22 +90,62 @@ export function ProductForm({
   );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Input
-          id="name"
-          label="Product Name"
-          placeholder="e.g. Basmati Rice Extra Long"
-          className="h-14 text-base px-4"
-          error={errors.name?.message}
-          {...register("name", { required: "Name is required" })}
-        />
+    <form
+      id="product-form"
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-10">
+      <FormSection title="Basic Information">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Input
+            id="name"
+            label="Product Name *"
+            placeholder="e.g. Badam Milk Powder Mix"
+            className="h-12 text-base px-4"
+            error={errors.name?.message}
+            {...register("name", {
+              required: "Name is required",
+              onChange: (e) => {
+                setValue("slug", toSlug(e.target.value), {
+                  shouldValidate: false,
+                });
+              },
+            })}
+          />
+
+          {isLoadingCategories ? (
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-bold text-foreground">
+                Category *
+              </span>
+              <div className="h-12 flex items-center px-4 border border-input bg-background rounded-xl text-sm">
+                <Loader size="sm" className="mr-2" /> Loading categories...
+              </div>
+            </div>
+          ) : (
+            <Select
+              id="categoryId"
+              label="Category *"
+              className="h-12 text-sm px-4"
+              error={errors.categoryId?.message}
+              {...register("categoryId", {
+                required: "Category is required",
+              })}>
+              <option value="">Select a Category</option>
+              {categories?.map((category: any) => (
+                <option key={category?._id} value={category?._id}>
+                  {category?.name}
+                </option>
+              ))}
+            </Select>
+          )}
+        </div>
 
         <Input
           id="slug"
-          label="Slug"
-          placeholder="e.g. basmati-rice-extra-long"
-          className="h-14 text-base px-4"
+          label="Slug *"
+          placeholder="e.g. sweets-desserts-badam-milk-powder-mix-200g"
+          className="h-12 text-sm px-4 bg-muted/30 cursor-not-allowed"
+          disabled
           error={errors.slug?.message}
           {...register("slug", {
             required: "Slug is required",
@@ -114,143 +155,117 @@ export function ProductForm({
             },
           })}
         />
-      </div>
+      </FormSection>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Input
-          id="pack"
-          label="Pack Size / Weight"
-          placeholder="e.g. 5kg, 12x400g"
-          className="h-14 text-base px-4"
-          error={errors.pack?.message}
-          {...register("pack", { required: "Pack size is required" })}
-        />
+      <FormSection title="Packaging & Pricing">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Input
+            id="pack"
+            label="Pack Size / Weight *"
+            placeholder="e.g. 200g, 12x400g"
+            className="h-12 text-base px-4"
+            error={errors.pack?.message}
+            {...register("pack", { required: "Pack size is required" })}
+          />
 
-        <Input
-          id="price"
-          type="number"
-          step="0.01"
-          min={0}
-          label="Price (£)"
-          placeholder="e.g. 12.99"
-          className="h-14 text-base px-4"
-          error={errors.price?.message}
-          {...register("price", {
-            required: "Price is required",
-            valueAsNumber: true,
-            min: { value: 0, message: "Price cannot be negative" },
-          })}
-        />
-      </div>
+          <Select
+            id="unit"
+            label="Unit *"
+            className="h-12 text-base px-4 capitalize"
+            error={errors.unit?.message}
+            {...register("unit", { required: "Unit is required" })}>
+            {Object.values(EProductUnit).map((u) => (
+              <option key={u} value={u} className="capitalize">
+                {u}
+              </option>
+            ))}
+          </Select>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <div className="flex flex-col gap-2">
-          <label
-            htmlFor="categoryId"
-            className="text-base font-bold text-foreground">
-            Category
-          </label>
-          {isLoadingCategories ? (
-            <div className="h-14 flex items-center px-4 border border-input bg-background rounded-xl text-base">
-              <Loader size="sm" className="mr-2" /> Loading categories...
-            </div>
-          ) : (
-            <select
-              id="categoryId"
-              className="h-14 w-full rounded-xl border border-input bg-background px-4 text-base font-normal outline-none transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
-              {...register("categoryId", { required: "Category is required" })}>
-              <option value="">Select a Category</option>
-              {categories.map((category: any) => (
-                <option key={category._id} value={category._id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          )}
-          {errors.categoryId && (
-            <p
-              className="text-xs font-semibold text-destructive mt-0.5"
-              role="alert">
-              {errors.categoryId.message}
-            </p>
-          )}
+          <Input
+            id="price"
+            type="number"
+            step="0.01"
+            min={0}
+            label="Price (£) *"
+            placeholder="0.00"
+            prefix="£"
+            className="h-12 text-base pr-4"
+            error={errors.price?.message}
+            {...register("price", {
+              required: "Price is required",
+              valueAsNumber: true,
+              min: { value: 0, message: "Price cannot be negative" },
+            })}
+          />
         </div>
+      </FormSection>
 
-        <div className="flex items-center gap-8 h-14 md:mt-8">
-          <div className="flex items-center gap-3">
-            <input
-              id="isVatApplicable"
-              type="checkbox"
-              className="size-5 rounded border-input accent-primary cursor-pointer"
-              {...register("isVatApplicable")}
-            />
-            <label
-              htmlFor="isVatApplicable"
-              className="text-base font-semibold text-foreground cursor-pointer select-none">
-              VAT Applicable
-            </label>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <input
-              id="isActive"
-              type="checkbox"
-              className="size-5 rounded border-input accent-primary cursor-pointer"
-              {...register("isActive")}
-            />
-            <label
-              htmlFor="isActive"
-              className="text-base font-semibold text-foreground cursor-pointer select-none">
-              Active
-            </label>
-          </div>
+      <FormSection title="Status & Tax">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <CheckboxCard
+            id="isActive"
+            label="Active Status"
+            {...register("isActive")}
+          />
+          <CheckboxCard
+            id="isVatApplicable"
+            label="VAT Applicable"
+            {...register("isVatApplicable")}
+          />
         </div>
-      </div>
+      </FormSection>
 
-      <div className="flex flex-col gap-2">
-        <label className="text-base font-bold text-foreground">
-          Related Products (Optional)
-        </label>
+      <FormSection title="Search & Discovery">
         <Controller
-          name="relatedProducts"
+          name="keywords"
           control={control}
+          rules={{
+            validate: (val) => {
+              if (!val || val.length === 0)
+                return "At least 1 keyword is required";
+              const lowercased = val.map((k) => k.toLowerCase().trim());
+              if (new Set(lowercased).size !== lowercased.length) {
+                return "Duplicate keywords are not allowed";
+              }
+              return true;
+            },
+          }}
           render={({ field }) => (
-            <PaginatedDropdown
+            <KeywordsInput
               value={field.value || []}
               onChange={field.onChange}
-              fetchData={fetchProductsOptions}
-              initialOptions={initialRelatedOptions}
-              placeholder="Search & select related products..."
+              error={errors.keywords?.message}
             />
           )}
         />
-      </div>
+      </FormSection>
 
-      <div className="flex flex-col gap-2">
-        <label
-          htmlFor="description"
-          className="text-base font-bold text-foreground">
-          Description (Optional)
-        </label>
-        <textarea
+      <FormSection title="Related Products">
+        <div className="flex flex-col gap-2">
+          <Controller
+            name="relatedProducts"
+            control={control}
+            render={({ field }) => (
+              <PaginatedDropdown
+                value={field.value || []}
+                onChange={field.onChange}
+                fetchData={fetchProductsOptions}
+                initialOptions={initialRelatedOptions}
+                placeholder="Search & select related products..."
+              />
+            )}
+          />
+        </div>
+      </FormSection>
+
+      <FormSection title="Description">
+        <Textarea
           id="description"
-          rows={4}
-          placeholder="Enter a detailed product description, ingredients, or notes..."
-          className="w-full rounded-xl border border-input bg-background p-4 text-base font-normal outline-none transition-all placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          rows={5}
+          placeholder="Enter a detailed product description, ingredients, or usage instructions..."
           {...register("description")}
         />
-      </div>
-
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full h-14 rounded-xl bg-primary text-primary-foreground text-lg font-extrabold hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer">
-        {isLoading ? (
-          <Loader size="sm" text="Saving..." className="animate-pulse" />
-        ) : (
-          submitLabel
-        )}
-      </button>
+      </FormSection>
     </form>
   );
 }
