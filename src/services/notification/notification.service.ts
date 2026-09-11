@@ -48,4 +48,9 @@ export const notificationService = {
     );
     return response.data;
   },
+
+  markAllAsRead: async () => {
+    const response = await axiosInstance.patch("/admin/notification/read-all");
+    return response.data;
+  },
 };

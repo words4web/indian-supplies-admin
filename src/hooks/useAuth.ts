@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/lib/store";
-import { clearAuth, setAuthUser, setAccessToken } from "@/lib/store/authSlice";
+import { RootState } from "@/store";
+import { clearAuth, setAuthUser, setAccessToken } from "@/store/authSlice";
 import { AuthUser } from "@/types/auth/auth.types";
 import { useCallback, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -41,6 +41,7 @@ export function useAuth() {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const user = useSelector((state: RootState) => state.auth.user);
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
 
   const signIn = useCallback(
     (userData: AuthUser, token?: string) => {
@@ -69,10 +70,7 @@ export function useAuth() {
     }
   }, [dispatch, queryClient]);
 
-  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
-  const queryState = queryClient.getQueryState(["profile"]);
-  const ready =
-    !accessToken || (queryState ? queryState?.status !== "pending" : true);
+  const ready = !accessToken || !!user;
 
   return {
     user,

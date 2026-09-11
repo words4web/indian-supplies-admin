@@ -37,10 +37,7 @@ export function AdminNotificationListener() {
           action: orderId
             ? {
                 label: "View Order",
-                onClick: () =>
-                  router.push(
-                    data?._id ? ROUTES.ORDER_DETAIL(data._id) : "/orders",
-                  ),
+                onClick: () => router.push(ROUTES.ORDER_DETAIL(orderId)),
               }
             : undefined,
         });

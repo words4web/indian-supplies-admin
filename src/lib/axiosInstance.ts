@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
-import { store } from "@/lib/store";
-import { clearAuth, setAccessToken } from "@/lib/store/authSlice";
+import { store } from "@/store";
+import { clearAuth, setAccessToken } from "@/store/authSlice";
 import { API_ROUTES } from "@/constants/api";
 import { ROUTES } from "@/constants/routes";
 

@@ -3,20 +3,15 @@
 import { useState } from "react";
 import { Bell, BellOff, Settings } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/lib/store";
-import {
-  setPermissionStatus,
-  setToggledOn,
-} from "@/lib/store/notificationSlice";
+import { RootState } from "@/store";
+import { setPermissionStatus, setToggledOn } from "@/store/notificationSlice";
 import { STORAGE_KEYS } from "@/constants/storage";
-
-interface AdminNotificationToggleProps {
-  className?: string;
-}
 
 export function AdminNotificationToggle({
   className = "",
-}: AdminNotificationToggleProps) {
+}: {
+  className?: string;
+}) {
   const dispatch = useDispatch();
   const { permissionStatus, isToggledOn } = useSelector(
     (state: RootState) => state.notification,

@@ -21,7 +21,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-8 w-full max-w-4xl">
+    <div className="space-y-8 w-full max-w-4xl py-4">
       <div>
         <h1 className="font-serif text-3xl font-extrabold tracking-tight text-foreground">
           Settings & Profile

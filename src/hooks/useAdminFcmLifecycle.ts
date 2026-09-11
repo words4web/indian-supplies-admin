@@ -4,11 +4,8 @@ import { useEffect, useRef } from "react";
 import { getToken } from "firebase/messaging";
 import { getFirebaseMessaging } from "@/lib/firebase";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setFcmToken,
-  setPermissionStatus,
-} from "@/lib/store/notificationSlice";
-import { RootState } from "@/lib/store";
+import { setFcmToken, setPermissionStatus } from "@/store/notificationSlice";
+import { RootState } from "@/store";
 import {
   useSyncDevice,
   useRemoveDevice,
@@ -30,6 +27,8 @@ export const useAdminFcmLifecycle = () => {
   const isSyncing = useRef(false);
 
   useEffect(() => {
+    if (!ready) return;
+
     if (!isAuthenticated || !user) {
       const tokenToRemove =
         typeof window !== "undefined"

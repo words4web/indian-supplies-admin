@@ -7,13 +7,12 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useSelector } from "react-redux";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { io, Socket } from "socket.io-client";
-import { RootState } from "@/lib/store";
 import { API_BASE_URL } from "@/lib/axiosInstance";
 import { registerAllSocketListeners } from "@/listeners/socket";
+import { useAuth } from "@/hooks/useAuth";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -35,7 +34,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const socketRef = useRef<Socket | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const { accessToken, user } = useSelector((state: RootState) => state?.auth);
+  const { user, ready } = useAuth();
 
   const connectSocket = () => {
     if (socketRef.current) return;
@@ -67,17 +66,21 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const shouldConnect = ready && !!user;
+
   useEffect(() => {
-    if (user && accessToken) {
+    if (shouldConnect) {
       connectSocket();
     } else {
       disconnectSocket();
     }
+  }, [shouldConnect]);
 
+  useEffect(() => {
     return () => {
       disconnectSocket();
     };
-  }, [user, accessToken]);
+  }, []);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>

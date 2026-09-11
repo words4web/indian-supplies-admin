@@ -14,12 +14,12 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 
 - **Framework**: Next.js 16.3.0 (using App Router & Turbopack)
 - **Runtime**: React 19 & React DOM 19
-- **State Management**: Redux Toolkit & Redux Persist (Session Storage)
+- **State Management**: Redux Toolkit & Redux Persist (`localStorage` for Auth & Notification slices)
 - **URL Search Params Management**: `nuqs` (v2 with Next.js App Router adapter)
 - **Data Fetching & Cache**: TanStack React Query (`@tanstack/react-query`)
 - **Form Management & Validation**: React Hook Form (`react-hook-form`) & Zod (`zod`)
 - **API Client**: Axios (configured with token refresh interceptors)
-- **Real-Time Communications**: Socket.io-client (`socket.io-client`) & Firebase Cloud Messaging (`firebase/app`, `firebase/messaging`)
+- **Real-Time Communications**: Socket.io-client (`socket.io-client` with auth `ready` status gating) & Firebase Cloud Messaging (`firebase/app`, `firebase/messaging`)
 - **Styling**: Tailwind CSS 4.3.3 + PostCSS
 - **Language**: TypeScript 5.7.3
 

@@ -9,22 +9,31 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
-import sessionStorage from "redux-persist/lib/storage/session";
-import authReducer from "./store/authSlice";
-import notificationReducer from "./store/notificationSlice";
+import localStorage from "redux-persist/lib/storage";
+import authReducer from "@/store/authSlice";
+import notificationReducer from "@/store/notificationSlice";
 
 const authPersistConfig = {
   key: "auth",
-  storage: sessionStorage,
-  blacklist: ["accessToken"],
+  storage: localStorage,
+};
+
+const notificationPersistConfig = {
+  key: "notification",
+  storage: localStorage,
+  whitelist: ["isToggledOn"],
 };
 
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
+const persistedNotificationReducer = persistReducer(
+  notificationPersistConfig,
+  notificationReducer,
+);
 
 export const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
-    notification: notificationReducer,
+    notification: persistedNotificationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

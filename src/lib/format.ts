@@ -17,3 +17,24 @@ export function hueIndex(seed: string): number {
   }
   return hash % 5;
 }
+
+export function formatDate(
+  dateValue: string | Date | null | undefined,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  if (!dateValue) return "";
+  const date = typeof dateValue === "string" ? new Date(dateValue) : dateValue;
+  if (isNaN(date.getTime())) return "";
+
+  return date.toLocaleDateString(
+    "en-GB",
+    options || {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    },
+  );
+}
+
+export const formatDateTime = formatDate;
