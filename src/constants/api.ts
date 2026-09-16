@@ -28,4 +28,8 @@ export const API_ROUTES = {
     LIST: "/admin/users",
     DETAIL: (id: string) => `/admin/users/${id}`,
   },
+  UPLOAD: {
+    GET_URLS: "/admin/upload/get-urls",
+    CONFIRM: "/admin/upload/confirm",
+  },
 };

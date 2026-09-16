@@ -26,6 +26,7 @@ export interface ProductRow {
       }
     | string;
   keywords?: string[];
+  images?: string[];
   relatedProducts?: RelatedProductItem[] | string[];
   isVatApplicable: boolean;
   isActive: boolean;
@@ -42,6 +43,7 @@ export interface ProductPayload {
   unit: EProductUnit;
   categoryId: string;
   keywords: string[];
+  images?: string[];
   relatedProducts?: string[];
   isVatApplicable?: boolean;
   isActive?: boolean;
@@ -56,6 +58,7 @@ export interface ProductFormValues {
   unit: EProductUnit;
   categoryId: string;
   keywords: string[];
+  images: string[];
   relatedProducts: string[];
   isVatApplicable: boolean;
   isActive: boolean;
@@ -67,4 +70,5 @@ export interface ProductFormProps {
   currentProductId?: string;
   onSubmit: (values: ProductFormValues) => void;
   onDirtyChange?: (isDirty: boolean) => void;
+  disabled?: boolean;
 }

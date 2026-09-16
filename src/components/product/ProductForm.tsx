@@ -1,5 +1,6 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { toast } from "sonner";
 import { Input } from "@/components/common/Input";
 import { Select } from "@/components/common/Select";
 import { Textarea } from "@/components/common/Textarea";
@@ -7,8 +8,10 @@ import { CheckboxCard } from "@/components/common/CheckboxCard";
 import { KeywordsInput } from "@/components/common/KeywordsInput";
 import { Loader } from "@/components/common/Loader";
 import { FormSection } from "@/components/common/FormSection";
+import { ImageUploader } from "@/components/common/ImageUploader";
 import { useCategories } from "@/services/category/category.hook";
 import { productService } from "@/services/product/product.service";
+import { uploadService } from "@/services/upload/upload.service";
 import {
   PaginatedDropdown,
   DropdownOption,
@@ -26,6 +29,7 @@ export function ProductForm({
   currentProductId,
   onSubmit,
   onDirtyChange,
+  disabled = false,
 }: ProductFormProps) {
   const {
     register,
@@ -43,6 +47,7 @@ export function ProductForm({
       unit: EProductUnit.CASE,
       categoryId: "",
       keywords: [],
+      images: [],
       relatedProducts: [],
       isVatApplicable: false,
       isActive: true,
@@ -89,10 +94,14 @@ export function ProductForm({
     [currentProductId],
   );
 
+  const handleFormSubmit = (values: ProductFormValues) => {
+    onSubmit(values);
+  };
+
   return (
     <form
       id="product-form"
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(handleFormSubmit)}
       className="space-y-10">
       <FormSection title="Basic Information">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -101,6 +110,7 @@ export function ProductForm({
             label="Product Name *"
             placeholder="e.g. Badam Milk Powder Mix"
             className="h-12 text-base px-4"
+            disabled={disabled}
             error={errors.name?.message}
             {...register("name", {
               required: "Name is required",
@@ -122,21 +132,29 @@ export function ProductForm({
               </div>
             </div>
           ) : (
-            <Select
-              id="categoryId"
-              label="Category *"
-              className="h-12 text-sm px-4"
-              error={errors.categoryId?.message}
-              {...register("categoryId", {
-                required: "Category is required",
-              })}>
-              <option value="">Select a Category</option>
-              {categories?.map((category: any) => (
-                <option key={category?._id} value={category?._id}>
-                  {category?.name}
-                </option>
-              ))}
-            </Select>
+            <Controller
+              name="categoryId"
+              control={control}
+              rules={{ required: "Category is required" }}
+              render={({ field }) => (
+                <Select
+                  id="categoryId"
+                  label="Category *"
+                  className="h-12 text-sm px-4"
+                  disabled={disabled}
+                  error={errors.categoryId?.message}
+                  value={field.value || ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  options={[
+                    { value: "", label: "Select a Category" },
+                    ...(categories?.map((c: any) => ({
+                      value: String(c._id),
+                      label: c.name,
+                    })) || []),
+                  ]}
+                />
+              )}
+            />
           )}
         </div>
 
@@ -157,6 +175,29 @@ export function ProductForm({
         />
       </FormSection>
 
+      <FormSection title="Product Media">
+        <Controller
+          name="images"
+          control={control}
+          rules={{
+            validate: (val) => {
+              if (val && val.length > 3) {
+                return "Maximum 3 images allowed";
+              }
+              return true;
+            },
+          }}
+          render={({ field }) => (
+            <ImageUploader
+              value={field.value || []}
+              onChange={field.onChange}
+              disabled={disabled}
+              error={errors.images?.message}
+            />
+          )}
+        />
+      </FormSection>
+
       <FormSection title="Packaging & Pricing">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Input
@@ -164,22 +205,31 @@ export function ProductForm({
             label="Pack Size / Weight *"
             placeholder="e.g. 200g, 12x400g"
             className="h-12 text-base px-4"
+            disabled={disabled}
             error={errors.pack?.message}
             {...register("pack", { required: "Pack size is required" })}
           />
 
-          <Select
-            id="unit"
-            label="Unit *"
-            className="h-12 text-base px-4 capitalize"
-            error={errors.unit?.message}
-            {...register("unit", { required: "Unit is required" })}>
-            {Object.values(EProductUnit).map((u) => (
-              <option key={u} value={u} className="capitalize">
-                {u}
-              </option>
-            ))}
-          </Select>
+          <Controller
+            name="unit"
+            control={control}
+            rules={{ required: "Unit is required" }}
+            render={({ field }) => (
+              <Select
+                id="unit"
+                label="Unit *"
+                className="h-12 text-base px-4 capitalize"
+                disabled={disabled}
+                error={errors.unit?.message}
+                value={field.value || ""}
+                onChange={(e) => field.onChange(e.target.value)}
+                options={Object.values(EProductUnit).map((u) => ({
+                  value: u,
+                  label: u,
+                }))}
+              />
+            )}
+          />
 
           <Input
             id="price"
@@ -190,6 +240,7 @@ export function ProductForm({
             placeholder="0.00"
             prefix="£"
             className="h-12 text-base pr-4"
+            disabled={disabled}
             error={errors.price?.message}
             {...register("price", {
               required: "Price is required",
@@ -205,11 +256,13 @@ export function ProductForm({
           <CheckboxCard
             id="isActive"
             label="Active Status"
+            disabled={disabled}
             {...register("isActive")}
           />
           <CheckboxCard
             id="isVatApplicable"
             label="VAT Applicable"
+            disabled={disabled}
             {...register("isVatApplicable")}
           />
         </div>
@@ -234,6 +287,7 @@ export function ProductForm({
             <KeywordsInput
               value={field.value || []}
               onChange={field.onChange}
+              disabled={disabled}
               error={errors.keywords?.message}
             />
           )}
@@ -263,6 +317,7 @@ export function ProductForm({
           id="description"
           rows={5}
           placeholder="Enter a detailed product description, ingredients, or usage instructions..."
+          disabled={disabled}
           {...register("description")}
         />
       </FormSection>

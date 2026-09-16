@@ -18,7 +18,7 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 - **URL Search Params Management**: `nuqs` (v2 with Next.js App Router adapter)
 - **Data Fetching & Cache**: TanStack React Query (`@tanstack/react-query`)
 - **Form Management & Validation**: React Hook Form (`react-hook-form`) & Zod (`zod`)
-- **API Client**: Axios (configured with token refresh interceptors)
+- **API Client**: Axios (configured with token refresh interceptors & S3 upload helpers)
 - **Real-Time Communications**: Socket.io-client (`socket.io-client` with auth `ready` status gating) & Firebase Cloud Messaging (`firebase/app`, `firebase/messaging`)
 - **Styling**: Tailwind CSS 4.3.3 + PostCSS
 - **Language**: TypeScript 5.7.3
@@ -38,9 +38,9 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 │   │   │   ├── [id]/         # Order detail view (OrderHeader, OrderCustomerDetails, OrderItemsTable)
 │   │   │   └── page.tsx      # Admin orders table
 │   │   ├── products/         # Product management
-│   │   │   ├── [id]/         # Product View & Edit views (`/products/[id]`, `/products/[id]/edit`)
+│   │   │   ├── [id]/         # Product View (`/products/[id]` with media gallery) & Edit (`/products/[id]/edit`)
 │   │   │   ├── new/          # Product Creation page (`/products/new`)
-│   │   │   └── page.tsx      # Products listing page with URL-synced search/filter/pagination
+│   │   │   └── page.tsx      # Products listing page with URL-synced search/filter/pagination (sorted newest first)
 │   │   ├── settings/         # Settings page with AdminNotificationToggle
 │   │   ├── users/            # Retailer user management
 │   │   │   ├── [id]/         # Retailer user detail view (profile, saved addresses, order history)
@@ -56,10 +56,11 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 ├── components/               # React Components
 │   ├── category/             # Category domain components
 │   ├── common/               # Shared dashboard & UI components
-│   │   ├── CheckboxCard.tsx  # Styled checkbox wrapper for boolean feature flags (e.g. Is Active, In Stock)
-│   │   ├── ConfirmModal.tsx  # Accessible modal for destructive actions / confirmations
+│   │   ├── CheckboxCard.tsx  # Styled checkbox wrapper for boolean feature flags (e.g. Is Active, VAT Applicable)
+│   │   ├── ConfirmModal.tsx  # Accessible modal for destructive actions & form confirmation (with isLoading state)
 │   │   ├── DataTable.tsx     # Generic paginated table with dynamic column width skeletons & row actions
 │   │   ├── FormSection.tsx   # Card layout wrapper for grouping related form fields with titles & descriptions
+│   │   ├── ImageUploader.tsx # Ultra-compact inline image tile strip (max 3 images, 3MB size limit, inline + tile)
 │   │   ├── Input.tsx         # Reusable form text/number input primitive
 │   │   ├── KeywordsInput.tsx # Tag/chip input component for managing string arrays (e.g., search keywords)
 │   │   ├── PageFilters.tsx   # Filter bar with debounced search input, category dropdown, clear filters button
@@ -71,12 +72,12 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 │   │   ├── Skeleton.tsx      # Loading skeleton primitives matching actual column widths
 │   │   └── Textarea.tsx      # Textarea component primitive
 │   ├── product/              # Product domain components
-│   │   └── ProductForm.tsx   # Reusable form component for create & edit product flows (zod + react-hook-form)
+│   │   └── ProductForm.tsx   # Reusable form component for create & edit product flows (zod + react-hook-form + ImageUploader)
 │   └── ui/                   # Low-level UI primitives (Button, Modal, etc.)
 │
 ├── constants/                # App Constants
-│   ├── api.ts                # Backend API routes mapping
-│   ├── product.constants.ts  # Product defaults and options constants
+│   ├── api.ts                # Backend API routes mapping (including UPLOAD endpoints)
+│   ├── product.constants.ts  # Product defaults and unit options constants
 │   ├── routes.ts             # App router routing definitions
 │   └── storage.ts            # Local and session storage keys
 │
@@ -98,14 +99,12 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 │   ├── category/             # Category API service & hooks
 │   ├── notification/         # Notification API service & React Query hooks
 │   ├── order/                # Order API service & hooks
-│   ├── product/              # Product API service & React Query hooks (`useProducts`, `useProduct`, `useCreateProduct`, `useUpdateProduct`, `useDeleteProduct`)
+│   ├── product/              # Product API service & React Query hooks (`useProducts`, `useProductDetail`, `useCreateProduct`, `useUpdateProduct`, `useDeleteProduct`)
+│   ├── upload/               # Direct S3 upload service (`uploadService.ts` with `uploadImages` and `processFormImages`)
 │   └── user/                 # User API service & hooks
 │
-└── types/                    # Core TypeScript Interfaces
-    ├── category.types.ts     # Category schema & payload definitions
-    ├── common.types.ts       # Shared payload & filter prop definitions
-    ├── product/              # Product domain types (`product.types.ts`)
-    └── user/                 # User payload schemas
+└── utils/                    # Utility scripts & helpers
+    └── fileValidation.ts     # Client-side image validation (3MB size, max 3 files, mime types)
 ```
 
 ---
@@ -115,24 +114,31 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 - **Product Form (`ProductForm.tsx`)**:
   - Reusable component shared by `/products/new` and `/products/[id]/edit`.
   - Driven by `react-hook-form` + `zod` schema validation.
-  - Supports detailed product fields: Name, Description, Category, Pack Size, Price, SKU, Status (`isActive`, `inStock`), and Keywords (`KeywordsInput.tsx`).
-  - Utilizes `FormSection.tsx` for visual grouping and `CheckboxCard.tsx` for boolean toggles.
+  - Supports detailed product fields: Name, Description, Category (Controller wrapped `<Select>`), Unit, Pack Size, Price, Status (`isActive`, `isVatApplicable`), Keywords (`KeywordsInput.tsx`), and Product Media (`ImageUploader.tsx`).
+- **Confirmation-First Upload Workflow**:
+  - Clicking "Save Changes" or "Create Product" runs form validation and opens `ConfirmModal` **before** uploading any images to AWS S3.
+  - When the user confirms in `ConfirmModal`, `uploadService.processFormImages` uploads pending `File` instances to S3, returns confirmed public URLs, and executes the create/update mutation.
+  - Modal displays active loading state (`"Processing..."`) while uploading and saving.
+- **Product Detail View (`/products/[id]/page.tsx`)**:
+  - Full-width clean card layout displaying product metadata, pricing, category, pack size, VAT status, and Product Media gallery displaying all uploaded product images.
 - **Product Navigation & History**:
-  - Direct back button handling preserving user navigation history.
-  - Success notifications on creation and update with redirect back to the product list.
+  - Direct back button handling preserving user navigation history and modal prompt on discarding unsaved changes.
 
 ---
 
 ## 5. UI Component Library & Shared Controls
 
+- **`ImageUploader.tsx` & Client Validation (`fileValidation.ts`)**:
+  - Ultra-compact inline thumbnail strip (`w-20 h-20` / `w-24 h-24`) with inline `+ Add Image` tile button.
+  - Enforces client-side constraints: max 3 images per product, 3MB per image, allowed types (`image/jpeg`, `image/png`, `image/webp`).
 - **`DataTable.tsx` & Dynamic Skeletons (`Skeleton.tsx`)**:
   - Table rows support hover-visible action triggers (`RowActions.tsx`).
-  - Loading skeletons calculate width dynamically based on column configurations (`w-2/5`, `w-1/5`, `w-28`, etc.) for seamless layout stability during data fetches.
+  - Skeletons calculate width dynamically based on column configurations for layout stability during data fetches.
 - **`Pagination.tsx`**:
-  - Smart ellipsis pagination rendering (e.g. `1 ... 4 5 6 ... 20` or `1 2 3 4 5 ... 20`).
+  - Smart ellipsis pagination rendering (`1 ... current ... total`).
   - Integrated with `isFetching` loading states.
 - **Custom Input Primitives**:
-  - Reusable `Input.tsx`, `Textarea.tsx`, `Select.tsx`, `CheckboxCard.tsx`, `KeywordsInput.tsx`, and `FormSection.tsx`.
+  - Reusable `Input.tsx`, `Textarea.tsx`, `Select.tsx`, `CheckboxCard.tsx`, `KeywordsInput.tsx`, `ImageUploader.tsx`, and `FormSection.tsx`.
 
 ---
 

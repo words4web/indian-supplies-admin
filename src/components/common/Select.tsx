@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface SelectOption {
   value: string;
@@ -89,11 +90,12 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
             id={id}
             disabled={disabled}
             onClick={() => setIsOpen((prev) => !prev)}
-            className={`h-14 w-full flex items-center justify-between rounded-xl border border-input bg-background pl-4 pr-3.5 text-sm font-medium outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-border/80 disabled:cursor-not-allowed disabled:opacity-50 text-foreground cursor-pointer ${
-              error
-                ? "border-destructive focus:ring-destructive/20 focus:border-destructive"
-                : ""
-            } ${className}`}>
+            className={cn(
+              "h-12 w-full flex items-center justify-between rounded-xl border border-input bg-background pl-4 pr-3.5 text-sm font-medium outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-border/80 disabled:cursor-not-allowed disabled:opacity-50 text-foreground cursor-pointer",
+              error &&
+                "border-destructive focus:ring-destructive/20 focus:border-destructive",
+              className,
+            )}>
             <span
               className={!selectedOption?.value ? "text-muted-foreground" : ""}>
               {selectedOption ? selectedOption.label : placeholder}

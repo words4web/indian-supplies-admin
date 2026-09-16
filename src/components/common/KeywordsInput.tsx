@@ -7,10 +7,12 @@ export function KeywordsInput({
   value = [],
   onChange,
   error,
+  disabled = false,
 }: {
   value?: string[];
   onChange: (keywords: string[]) => void;
   error?: string;
+  disabled?: boolean;
 }) {
   const [input, setInput] = useState("");
   const [internalError, setInternalError] = useState<string | null>(null);
@@ -72,18 +74,20 @@ export function KeywordsInput({
           <input
             type="text"
             value={input}
+            disabled={disabled}
             onChange={(e) => {
               setInput(e.target.value);
               if (internalError) setInternalError(null);
             }}
             onKeyDown={handleKeyDown}
             placeholder="Type keyword and press Enter..."
-            className="h-12 flex-1 rounded-xl border border-input bg-background px-4 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            className="h-12 flex-1 rounded-xl border border-input bg-background px-4 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button
             type="button"
+            disabled={disabled}
             onClick={() => addKeyword(input)}
-            className="h-12 px-5 rounded-xl bg-secondary text-secondary-foreground font-bold hover:bg-secondary/80 transition-colors flex items-center gap-1 cursor-pointer">
+            className="h-12 px-5 rounded-xl bg-secondary text-secondary-foreground font-bold hover:bg-secondary/80 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
             <Plus className="size-4" /> Add
           </button>
         </div>
@@ -95,12 +99,14 @@ export function KeywordsInput({
                 key={index}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-sm font-semibold border border-primary/20">
                 {kw}
-                <button
-                  type="button"
-                  onClick={() => removeKeyword(index)}
-                  className="hover:text-destructive transition-colors cursor-pointer">
-                  <X className="size-3.5" />
-                </button>
+                {!disabled && (
+                  <button
+                    type="button"
+                    onClick={() => removeKeyword(index)}
+                    className="hover:text-destructive transition-colors cursor-pointer">
+                    <X className="size-3.5" />
+                  </button>
+                )}
               </span>
             ))}
 

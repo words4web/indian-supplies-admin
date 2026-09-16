@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   useProductDetail,
   useUpdateProduct,
@@ -11,7 +12,7 @@ import { ProductFormValues } from "@/types/product/product.types";
 import { QueryBoundary } from "@/components/common/QueryBoundary";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
-import { ROUTES } from "@/constants/routes";
+import { uploadService } from "@/services/upload/upload.service";
 
 export default function EditProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +27,7 @@ export default function EditProductPage() {
   const [pendingValues, setPendingValues] = useState<ProductFormValues | null>(
     null,
   );
+  const [isUploading, setIsUploading] = useState(false);
 
   const product = data?.data;
 
@@ -57,14 +59,29 @@ export default function EditProductPage() {
     setShowSaveModal(true);
   };
 
-  const handleConfirmSave = () => {
-    if (!pendingValues) return;
-    updateProduct(
-      { id, payload: pendingValues },
-      {
-        onSuccess: () => router.back(),
-      },
-    );
+  const handleConfirmSave = async () => {
+    if (!pendingValues || !id) return;
+    try {
+      setIsUploading(true);
+      const finalImages = await uploadService.processFormImages(
+        pendingValues?.images,
+      );
+      updateProduct(
+        { id, payload: { ...pendingValues, images: finalImages } },
+        {
+          onSuccess: () => {
+            setShowSaveModal(false);
+            router.back();
+          },
+          onError: () => {
+            setIsUploading(false);
+          },
+        },
+      );
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to upload images. Please try again.");
+      setIsUploading(false);
+    }
   };
 
   const formattedDefaultValues: Partial<ProductFormValues> = {
@@ -79,6 +96,7 @@ export default function EditProductPage() {
         ? product?.categoryId?._id
         : product?.categoryId,
     keywords: Array.isArray(product?.keywords) ? product?.keywords : [],
+    images: Array.isArray(product?.images) ? product?.images : [],
     relatedProducts: Array.isArray(product?.relatedProducts)
       ? product?.relatedProducts?.map((p: any) =>
           typeof p === "object" ? p?._id : p,
@@ -93,6 +111,8 @@ export default function EditProductPage() {
         ?.filter((p: any) => typeof p === "object" && p?._id && p?.name)
         ?.map((p: any) => ({ value: p._id, label: p.name }))
     : [];
+
+  const isBusy = isPending || isUploading;
 
   return (
     <QueryBoundary
@@ -111,7 +131,7 @@ export default function EditProductPage() {
           type: "submit",
           form: "product-form",
           variant: "default",
-          isLoading: isPending,
+          isLoading: isBusy,
         }}
       />
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
@@ -123,6 +143,7 @@ export default function EditProductPage() {
               currentProductId={id || product?._id}
               onSubmit={handleSubmitForm}
               onDirtyChange={setIsFormDirty}
+              disabled={isBusy}
             />
           </div>
         </div>
@@ -141,8 +162,9 @@ export default function EditProductPage() {
 
       <ConfirmModal
         isOpen={showSaveModal}
-        onClose={() => setShowSaveModal(false)}
+        onClose={() => !isBusy && setShowSaveModal(false)}
         onConfirm={handleConfirmSave}
+        isLoading={isBusy}
         title="Save Changes?"
         description="Are you sure you want to update this product's information?"
         confirmText="Save Product"

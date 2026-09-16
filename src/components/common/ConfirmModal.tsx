@@ -11,6 +11,7 @@ interface ConfirmModalProps {
   confirmText?: string;
   cancelText?: string;
   variant?: "default" | "destructive";
+  isLoading?: boolean;
 }
 
 export function ConfirmModal({
@@ -22,6 +23,7 @@ export function ConfirmModal({
   confirmText = "Confirm",
   cancelText = "Cancel",
   variant = "default",
+  isLoading = false,
 }: ConfirmModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -46,10 +48,13 @@ export function ConfirmModal({
 
     const handleCancel = (e: Event) => {
       e.preventDefault();
-      onClose();
+      if (!isLoading) {
+        onClose();
+      }
     };
 
     const handleClickOutside = (e: MouseEvent) => {
+      if (isLoading) return;
       if (e.target === dialog) {
         const rect = dialog.getBoundingClientRect();
         const isInside =
@@ -70,7 +75,7 @@ export function ConfirmModal({
       dialog.removeEventListener("cancel", handleCancel);
       dialog.removeEventListener("click", handleClickOutside);
     };
-  }, [onClose]);
+  }, [onClose, isLoading]);
 
   return (
     <dialog
@@ -86,6 +91,7 @@ export function ConfirmModal({
             size="icon"
             className="size-8 rounded-lg text-muted-foreground"
             onClick={onClose}
+            disabled={isLoading}
             aria-label="Close dialog">
             <X className="size-4" />
           </Button>
@@ -94,16 +100,14 @@ export function ConfirmModal({
         <p className="text-sm leading-relaxed ">{description}</p>
 
         <div className="mt-2 flex items-center justify-end gap-3">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
             {cancelText}
           </Button>
           <Button
             variant={variant === "destructive" ? "destructive" : "default"}
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}>
-            {confirmText}
+            disabled={isLoading}
+            onClick={onConfirm}>
+            {isLoading ? "Processing..." : confirmText}
           </Button>
         </div>
       </div>
