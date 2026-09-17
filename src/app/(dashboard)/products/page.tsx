@@ -24,8 +24,11 @@ export default function ProductsPage() {
     useProductFilters();
   const [pendingDelete, setPendingDelete] = useState<ProductRow | null>(null);
 
-  const { data: categoriesData, isLoading: isLoadingCategories } =
-    useCategories({ limit: 100, isActive: true });
+  const {
+    data: categoriesData,
+    isLoading: isLoadingCategories,
+    refetch: refetchCategories,
+  } = useCategories({ limit: 100, isActive: true });
 
   const categoryOptions =
     categoriesData?.data?.categories?.map((cat: any) => ({
@@ -40,6 +43,11 @@ export default function ProductsPage() {
     categoryId: category || undefined,
   });
   const { mutate: deleteProduct } = useDeleteProduct();
+
+  const handleRefetch = () => {
+    refetchCategories();
+    refetch();
+  };
 
   const products: ProductRow[] = data?.data?.products ?? [];
   const total: number = data?.data?.total ?? 0;
@@ -163,7 +171,7 @@ export default function ProductsPage() {
         isLoading={false}
         isError={isError}
         error={error}
-        refetch={refetch}
+        refetch={handleRefetch}
         hasData={true}
         notFoundMessage="Failed to load products.">
         <DataTable

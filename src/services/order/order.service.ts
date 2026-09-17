@@ -2,8 +2,15 @@ import { axiosInstance } from "@/lib/axiosInstance";
 import { API_ROUTES } from "@/constants/api";
 
 export const orderService = {
-  list: async () => {
-    const response = await axiosInstance.get(API_ROUTES.ORDERS.LIST);
+  list: async (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: string;
+  }) => {
+    const response = await axiosInstance.get(API_ROUTES.ORDERS.LIST, {
+      params,
+    });
     return response.data;
   },
   detail: async (id: string) => {

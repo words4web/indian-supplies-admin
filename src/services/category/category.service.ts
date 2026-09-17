@@ -6,6 +6,7 @@ export const categoryService = {
     page?: number;
     limit?: number;
     isActive?: boolean;
+    search?: string;
   }) => {
     const response = await axiosInstance.get(API_ROUTES.CATEGORIES.LIST, {
       params,

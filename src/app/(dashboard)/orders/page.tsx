@@ -1,23 +1,44 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Eye } from "lucide-react";
 import { useAdminOrdersQuery } from "@/services/order/order.hook";
 import { DataTable, TableColumn } from "@/components/common/DataTable";
-import { Loader } from "@/components/common/Loader";
-import { ErrorView } from "@/components/common/ErrorView";
+import { PageHeader } from "@/components/common/PageHeader";
+import { PageFilters } from "@/components/common/PageFilters";
+import { QueryBoundary } from "@/components/common/QueryBoundary";
+import { Pagination } from "@/components/common/Pagination";
 import { formatPounds } from "@/lib/format";
+import { formatDate } from "@/utils/format";
+import { ROUTES } from "@/constants/routes";
+
+const LIMIT = 10;
 
 export default function OrdersPage() {
+  const router = useRouter();
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
   const {
     data: responseBody,
-    isLoading,
+    isFetching,
     isError,
     error,
     refetch,
-  } = useAdminOrdersQuery();
+  } = useAdminOrdersQuery({
+    page,
+    limit: LIMIT,
+    search: searchTerm?.trim() || undefined,
+    status: statusFilter || undefined,
+  });
 
-  const orders = responseBody?.data || [];
+  const ordersData = responseBody?.data;
+  const orders = ordersData?.orders || [];
+  const total = ordersData?.total || 0;
+  const totalPages = ordersData?.totalPages || 1;
 
   const columns: TableColumn<any>[] = [
     {
@@ -93,72 +114,88 @@ export default function OrdersPage() {
       key: "date",
       header: "Date Placed",
       render: (row) => (
-        <span className="text-sm text-muted-foreground">
-          {new Date(row.createdAt).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+        <span className="text-xs text-muted-foreground">
+          {formatDate(row.createdAt, { includeTime: true })}
         </span>
       ),
     },
     {
       key: "actions",
       header: "Actions",
+      className: "text-right w-24",
       render: (row) => (
-        <Link
-          href={`/orders/${row._id}`}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
-          <Eye className="h-3.5 w-3.5" /> View
-        </Link>
+        <div className="flex justify-end">
+          <Link
+            href={ROUTES.ORDERS.DETAIL(row._id)}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-secondary">
+            <Eye className="size-3.5" /> View
+          </Link>
+        </div>
       ),
     },
   ];
 
-  if (isError) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground">
-            Orders
-          </h1>
-        </div>
-        <ErrorView
-          message={error?.message || "Failed to load orders"}
-          onRetry={refetch}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground">
-            Orders
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            View, track, and manage wholesale order requests.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Orders"
+        subtitle={`${total} ${total === 1 ? "order request" : "order requests"} total`}
+      />
 
-      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-        {isLoading ? (
-          <div className="py-20 flex justify-center">
-            <Loader />
-          </div>
-        ) : (
-          <DataTable
-            data={orders}
-            columns={columns}
-            keyExtractor={(row) => row._id}
-          />
-        )}
-      </div>
+      <PageFilters
+        searchQuery={searchTerm}
+        onSearchChange={(val) => {
+          setSearchTerm(val);
+          setPage(1);
+        }}
+        searchPlaceholder="Search by order ID, name, business..."
+        categoryValue={statusFilter}
+        onCategoryChange={(val) => {
+          setStatusFilter(val);
+          setPage(1);
+        }}
+        categoryOptions={[
+          { value: "IN_PROCESS", label: "In Process" },
+          { value: "DELIVERED", label: "Delivered" },
+        ]}
+        categoryPlaceholder="All Statuses"
+        onClearFilters={() => {
+          setSearchTerm("");
+          setStatusFilter("");
+          setPage(1);
+        }}
+        hasActiveFilters={!!searchTerm || !!statusFilter}
+      />
+
+      <QueryBoundary
+        isLoading={false}
+        isError={isError}
+        error={error}
+        refetch={refetch}
+        hasData={true}
+        notFoundMessage="Failed to load orders.">
+        <DataTable
+          columns={columns}
+          data={orders}
+          isLoading={isFetching}
+          skeletonCount={LIMIT}
+          keyExtractor={(row) => row?._id}
+          onRowClick={(row) => router.push(ROUTES.ORDERS.DETAIL(row._id))}
+          emptyMessage={
+            searchTerm || statusFilter
+              ? "No order requests match your filter criteria."
+              : "No wholesale order requests found."
+          }
+        />
+
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          isLoading={isFetching}
+        />
+      </QueryBoundary>
     </div>
   );
 }

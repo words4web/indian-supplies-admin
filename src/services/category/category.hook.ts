@@ -14,6 +14,7 @@ export const useCategories = (params?: {
   page?: number;
   limit?: number;
   isActive?: boolean;
+  search?: string;
 }) => {
   return useQuery({
     queryKey: categoryKeys.list(params || {}),

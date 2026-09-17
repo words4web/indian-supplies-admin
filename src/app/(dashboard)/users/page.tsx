@@ -2,34 +2,39 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, Search, UserCheck, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Eye } from "lucide-react";
 import { useUsersQuery } from "@/services/user/user.hook";
 import { DataTable, TableColumn } from "@/components/common/DataTable";
-import { Loader } from "@/components/common/Loader";
-import { ErrorView } from "@/components/common/ErrorView";
+import { PageHeader } from "@/components/common/PageHeader";
+import { PageFilters } from "@/components/common/PageFilters";
+import { QueryBoundary } from "@/components/common/QueryBoundary";
 import { Pagination } from "@/components/common/Pagination";
-import { useDebounce } from "@/hooks/useDebounce";
 import { ROUTES } from "@/constants/routes";
 
+const LIMIT = 10;
+
 export default function UsersPage() {
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearch = useDebounce(searchTerm, 400);
 
   const {
     data: responseBody,
-    isLoading,
+    isFetching,
     isError,
     error,
     refetch,
   } = useUsersQuery({
     page,
-    limit: 10,
-    search: debouncedSearch,
+    limit: LIMIT,
+    search: searchTerm?.trim() || undefined,
   });
 
   const users = responseBody?.data || [];
-  const meta = responseBody?.meta || { totalPages: 1 };
+  const meta = responseBody?.meta || { totalPages: 1, total: 0 };
+  const total = meta?.totalCount || meta?.total || users.length;
+  const totalPages = meta?.totalPages || Math.ceil(total / LIMIT) || 1;
 
   const columns: TableColumn<any>[] = [
     {
@@ -87,76 +92,69 @@ export default function UsersPage() {
     {
       key: "actions",
       header: "Actions",
-      className: "text-right",
+      className: "text-right w-24",
       render: (row) => (
         <div className="flex justify-end">
           <Link
-            href={ROUTES.USERS.DETAIL(row._id)}
+            href={ROUTES.USERS.DETAIL(row?._id)}
+            onClick={(e) => e.stopPropagation()}
             className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-secondary">
-            <Eye className="size-3.5" /> View Details
+            <Eye className="size-3.5" /> View
           </Link>
         </div>
       ),
     },
   ];
 
-  if (isLoading) return <Loader text="Loading Retailer Accounts..." />;
-  if (isError)
-    return (
-      <ErrorView
-        message={error?.message || "Failed to load retailer accounts"}
-        onRetry={refetch}
-      />
-    );
-
   return (
-    <div className="space-y-6 w-full">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="font-serif text-3xl font-extrabold tracking-tight text-foreground">
-            Retailer Accounts
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage wholesale customers, business profiles, and account details.
-          </p>
-        </div>
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search by name, business, email..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setPage(1);
-            }}
-            className="w-full rounded-xl border border-border bg-card pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Customer Accounts"
+        subtitle={`${total} ${total === 1 ? "account" : "accounts"} total`}
+      />
 
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <PageFilters
+        searchQuery={searchTerm}
+        onSearchChange={(val) => {
+          setSearchTerm(val);
+          setPage(1);
+        }}
+        searchPlaceholder="Search by name, business, email..."
+        onClearFilters={() => {
+          setSearchTerm("");
+          setPage(1);
+        }}
+        hasActiveFilters={!!searchTerm}
+      />
+
+      <QueryBoundary
+        isLoading={false}
+        isError={isError}
+        error={error}
+        refetch={refetch}
+        hasData={true}
+        notFoundMessage="Failed to load customer accounts.">
         <DataTable
           columns={columns}
           data={users}
+          isLoading={isFetching}
+          skeletonCount={LIMIT}
           keyExtractor={(row) => row._id}
+          onRowClick={(row) => router.push(ROUTES.USERS.DETAIL(row._id))}
           emptyMessage={
             searchTerm
-              ? "No retailer accounts match your search filter."
-              : "No registered wholesale customer accounts found."
+              ? "No customer accounts match your search filter."
+              : "No registered customer accounts found."
           }
         />
 
-        {meta.totalPages > 1 && (
-          <div className="mt-6 flex justify-end">
-            <Pagination
-              page={page}
-              totalPages={meta.totalPages}
-              onPageChange={setPage}
-            />
-          </div>
-        )}
-      </div>
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          isLoading={isFetching}
+        />
+      </QueryBoundary>
     </div>
   );
 }

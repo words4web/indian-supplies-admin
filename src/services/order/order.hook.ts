@@ -2,10 +2,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { orderService } from "./order.service";
 
-export const useAdminOrdersQuery = () => {
+export const useAdminOrdersQuery = (params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+}) => {
   return useQuery({
-    queryKey: ["admin", "orders"],
-    queryFn: () => orderService.list(),
+    queryKey: ["admin", "orders", params],
+    queryFn: () => orderService.list(params),
   });
 };
 

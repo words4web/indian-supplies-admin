@@ -4,7 +4,7 @@ import React from "react";
 import { CheckCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationItem } from "@/types/notification.types";
-import { formatDate } from "@/lib/format";
+import { formatDate } from "@/utils/format";
 
 export function NotificationCard({
   item,

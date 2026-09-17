@@ -9,29 +9,33 @@ import {
   useDeleteCategory,
 } from "@/services/category/category.hook";
 import { DataTable, TableColumn } from "@/components/common/DataTable";
+import { PageHeader } from "@/components/common/PageHeader";
+import { PageFilters } from "@/components/common/PageFilters";
 import { QueryBoundary } from "@/components/common/QueryBoundary";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { CategoryRow } from "@/types/category/category.types";
 import { ROUTES } from "@/constants/routes";
 import { Pagination } from "@/components/common/Pagination";
-import { PageHeader } from "@/components/common/PageHeader";
+import { formatDate } from "@/utils/format";
+
+const LIMIT = 10;
 
 export default function CategoriesPage() {
   const router = useRouter();
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
   const [pendingDelete, setPendingDelete] = useState<CategoryRow | null>(null);
-  const limit = 20;
 
-  const { data, isLoading, isError, error, refetch } = useCategories({
+  const { data, isFetching, isError, error, refetch } = useCategories({
     page,
-    limit,
+    limit: LIMIT,
+    search: search?.trim() || undefined,
   });
   const { mutate: deleteCategory } = useDeleteCategory();
 
   const categories: CategoryRow[] = data?.data?.categories ?? [];
-
   const total: number = data?.data?.total ?? 0;
-  const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.ceil(total / LIMIT) || 1;
 
   const columns: TableColumn<CategoryRow>[] = [
     {
@@ -44,25 +48,39 @@ export default function CategoriesPage() {
     {
       key: "slug",
       header: "Slug",
-      render: (row) => <span className="font-mono text-xs">{row?.slug}</span>,
+      render: (row) => (
+        <span className="font-mono text-xs text-muted-foreground">
+          {row?.slug}
+        </span>
+      ),
     },
     {
       key: "status",
       header: "Status",
       render: (row) => (
         <span
-          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
+          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
             row?.isActive
-              ? "bg-emerald-500/10 text-emerald-700"
-              : "bg-muted text-muted-foreground"
+              ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/20"
+              : "bg-muted text-muted-foreground border border-border/40"
           }`}>
           {row?.isActive ? "Active" : "Inactive"}
         </span>
       ),
     },
     {
+      key: "updatedAt",
+      header: "Last Updated",
+      render: (row) => (
+        <span className="text-xs text-muted-foreground">
+          {formatDate(row?.updatedAt, { includeTime: true })}
+        </span>
+      ),
+    },
+    {
       key: "actions",
-      header: "",
+      header: "Actions",
+      className: "text-right w-24",
       render: (row) => (
         <RowActions
           id={`actions-${row?._id}`}
@@ -97,8 +115,22 @@ export default function CategoriesPage() {
         }}
       />
 
+      <PageFilters
+        searchQuery={search}
+        onSearchChange={(val) => {
+          setSearch(val);
+          setPage(1);
+        }}
+        searchPlaceholder="Search categories by name or slug..."
+        onClearFilters={() => {
+          setSearch("");
+          setPage(1);
+        }}
+        hasActiveFilters={!!search}
+      />
+
       <QueryBoundary
-        isLoading={isLoading}
+        isLoading={false}
         isError={isError}
         error={error}
         refetch={refetch}
@@ -107,15 +139,22 @@ export default function CategoriesPage() {
         <DataTable
           columns={columns}
           data={categories}
+          isLoading={isFetching}
+          skeletonCount={LIMIT}
           keyExtractor={(row) => row?._id}
           onRowClick={(row) => router.push(ROUTES.CATEGORIES.DETAIL(row?._id))}
-          emptyMessage="No categories found. Create your first one!"
+          emptyMessage={
+            search
+              ? "No categories match your search filter."
+              : "No categories found. Create your first one!"
+          }
         />
 
         <Pagination
           page={page}
           totalPages={totalPages}
           onPageChange={setPage}
+          isLoading={isFetching}
         />
       </QueryBoundary>
 
