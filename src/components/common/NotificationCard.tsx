@@ -38,37 +38,37 @@ export function NotificationCard({
           </h3>
         </div>
 
-        <span className="text-[11px] font-medium text-muted-foreground shrink-0 pt-0.5">
-          {formatDate(item?.createdAt)}
-        </span>
+        <div className="flex items-center gap-2 shrink-0 pt-0.5">
+          {!item?.isRead && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => onMarkAsRead(e, item)}
+              className="h-6 text-[11px] gap-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-primary hover:bg-primary/10"
+              title="Mark as read">
+              <CheckCircle className="size-3.5" />
+              <span>Mark read</span>
+            </Button>
+          )}
+
+          <span className="text-[11px] font-medium text-muted-foreground whitespace-nowrap">
+            {formatDate(item?.createdAt, { includeTime: true })}
+          </span>
+        </div>
       </div>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
         {item?.body}
       </p>
 
-      <div className="flex items-center justify-between text-xs pt-1 min-h-[24px]">
-        <div>
-          {item?.metadata?.orderId && (
-            <Button size="sm" className="h-7 text-xs gap-1 px-3">
-              View Order
-              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-            </Button>
-          )}
-        </div>
-
-        {!item?.isRead && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => onMarkAsRead(e, item)}
-            className="h-7 text-[11px] gap-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-primary hover:bg-primary/10 ml-auto"
-            title="Mark as read">
-            <CheckCircle className="size-3.5" />
-            <span>Mark read</span>
+      {item?.metadata?.orderId && (
+        <div className="pt-1">
+          <Button size="sm" className="h-7 text-xs gap-1 px-3">
+            View Order
+            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
