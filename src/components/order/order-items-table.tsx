@@ -86,12 +86,10 @@ export function OrderItemsTable({
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right font-medium text-muted-foreground">
-                  {formatPounds(item?.priceAtOrder || 0)}
+                  {formatPounds(item?.price || 0)}
                 </td>
                 <td className="px-6 py-4 text-right font-bold text-foreground">
-                  {formatPounds(
-                    (item?.priceAtOrder || 0) * (item?.quantity || 0),
-                  )}
+                  {formatPounds((item?.price || 0) * (item?.quantity || 0))}
                 </td>
               </tr>
             ))}

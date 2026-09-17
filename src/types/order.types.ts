@@ -18,7 +18,7 @@ export interface OrderItem {
       }
     | string;
   quantity: number;
-  priceAtOrder: number;
+  price: number;
 }
 
 export interface OrderRow {
@@ -84,7 +84,7 @@ export interface OrderItemsTableProps {
       pack?: string;
     };
     quantity: number;
-    priceAtOrder: number;
+    price: number;
   }>;
   subtotal?: number;
   vat?: number;
