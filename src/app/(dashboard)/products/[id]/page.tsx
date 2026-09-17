@@ -31,7 +31,7 @@ export default function ProductDetailPage() {
             id: "edit-product-btn",
             label: "Edit Product",
             icon: <Pencil className="size-4" />,
-            onClick: () => router.push(`${ROUTES.PRODUCTS}/${id}/edit`),
+            onClick: () => router.push(ROUTES.PRODUCTS.EDIT(id)),
           }}
         />
 

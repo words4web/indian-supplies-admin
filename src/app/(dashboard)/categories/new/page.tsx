@@ -13,7 +13,7 @@ export default function NewCategoryPage() {
 
   const handleSubmit = (values: CategoryFormValues) => {
     createCategory(values, {
-      onSuccess: () => router.push(ROUTES.CATEGORIES),
+      onSuccess: () => router.push(ROUTES.CATEGORIES.ROOT),
     });
   };
 
@@ -22,7 +22,7 @@ export default function NewCategoryPage() {
       <PageHeader
         title="New Category"
         subtitle="Create a new product category"
-        backHref={ROUTES.CATEGORIES}
+        backHref={ROUTES.CATEGORIES.ROOT}
       />
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
         <div className="w-full max-w-xl">

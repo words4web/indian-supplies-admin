@@ -27,12 +27,12 @@ export default function CategoryDetailPage() {
         <PageHeader
           title={category?.name}
           subtitle="View product category information"
-          backHref={ROUTES.CATEGORIES}
+          backHref={ROUTES.CATEGORIES.ROOT}
           action={{
             id: "edit-category-btn",
             label: "Edit Category",
             icon: <Pencil className="size-4" />,
-            onClick: () => router.push(`${ROUTES.CATEGORIES}/${id}/edit`),
+            onClick: () => router.push(ROUTES.CATEGORIES.EDIT(id)),
           }}
         />
 

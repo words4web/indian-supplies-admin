@@ -115,12 +115,12 @@ export default function ProductsPage() {
             {
               label: "View",
               icon: <Eye className="size-4" />,
-              onClick: () => router.push(`${ROUTES.PRODUCTS}/${row?._id}`),
+              onClick: () => router.push(ROUTES.PRODUCTS.DETAIL(row?._id)),
             },
             {
               label: "Edit",
               icon: <Pencil className="size-4" />,
-              onClick: () => router.push(`${ROUTES.PRODUCTS}/${row?._id}/edit`),
+              onClick: () => router.push(ROUTES.PRODUCTS.EDIT(row?._id)),
             },
             {
               label: "Delete",
@@ -143,7 +143,7 @@ export default function ProductsPage() {
           id: "add-product-btn",
           label: "Add Product",
           icon: <Plus className="size-4" />,
-          onClick: () => router.push(`${ROUTES.PRODUCTS}/new`),
+          onClick: () => router.push(ROUTES.PRODUCTS.NEW),
         }}
       />
 
@@ -172,7 +172,7 @@ export default function ProductsPage() {
           isLoading={isFetching}
           skeletonCount={LIMIT}
           keyExtractor={(row) => row?._id}
-          onRowClick={(row) => router.push(`${ROUTES.PRODUCTS}/${row?._id}`)}
+          onRowClick={(row) => router.push(ROUTES.PRODUCTS.DETAIL(row?._id))}
           emptyMessage={
             search
               ? "No products match your search query."

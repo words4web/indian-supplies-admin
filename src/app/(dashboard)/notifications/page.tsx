@@ -51,7 +51,7 @@ export default function AdminNotificationsPage() {
     }
     const orderId = item?.metadata?.orderId;
     if (orderId) {
-      router.push(ROUTES.ORDER_DETAIL(orderId));
+      router.push(ROUTES.ORDERS.DETAIL(orderId));
     }
   };
 

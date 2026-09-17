@@ -91,7 +91,7 @@ export default function UsersPage() {
       render: (row) => (
         <div className="flex justify-end">
           <Link
-            href={ROUTES.USER_DETAIL(row._id)}
+            href={ROUTES.USERS.DETAIL(row._id)}
             className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-secondary">
             <Eye className="size-3.5" /> View Details
           </Link>

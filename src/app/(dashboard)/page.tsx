@@ -14,7 +14,7 @@ export default function OverviewPage() {
       name: "Categories",
       description:
         "Manage product groupings, tags, and classification hierarchies.",
-      href: ROUTES.CATEGORIES,
+      href: ROUTES.CATEGORIES.ROOT,
       icon: Tag,
       color:
         "text-blue-600 bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20",
@@ -23,7 +23,7 @@ export default function OverviewPage() {
       name: "Products",
       description:
         "Review catalogue inventory, update pack pricing, and add details.",
-      href: ROUTES.PRODUCTS,
+      href: ROUTES.PRODUCTS.ROOT,
       icon: Package,
       color:
         "text-emerald-600 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20",
@@ -32,7 +32,7 @@ export default function OverviewPage() {
       name: "Orders",
       description:
         "Track wholesale order status updates and review client requests.",
-      href: ROUTES.ORDERS,
+      href: ROUTES.ORDERS.ROOT,
       icon: ShoppingBag,
       color:
         "text-amber-600 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20",
@@ -40,7 +40,7 @@ export default function OverviewPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 py-5">
       <div>
         <h1 className="font-serif text-3xl font-extrabold tracking-tight">
           Welcome back, {user?.name || "Admin"}

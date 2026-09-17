@@ -23,7 +23,7 @@ export default function EditCategoryPage() {
   const handleSubmit = (values: CategoryFormValues) => {
     updateCategory(
       { id, payload: values },
-      { onSuccess: () => router.push(ROUTES.CATEGORIES) },
+      { onSuccess: () => router.push(ROUTES.CATEGORIES.ROOT) },
     );
   };
 
@@ -38,7 +38,7 @@ export default function EditCategoryPage() {
       <PageHeader
         title="Edit Category"
         subtitle={category?.name}
-        backHref={`${ROUTES.CATEGORIES}/${id}`}
+        backHref={ROUTES.CATEGORIES.DETAIL(id)}
       />
       <div className="flex flex-col items-center justify-center min-h-[55vh]">
         <div className="w-full max-w-xl">

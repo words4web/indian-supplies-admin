@@ -49,7 +49,7 @@ export default function UserDetailPage() {
       <div className="space-y-6 max-w-4xl mx-auto">
         <Button
           variant="ghost"
-          onClick={() => router.push(ROUTES.USERS)}
+          onClick={() => router.push(ROUTES.USERS.ROOT)}
           className="inline-flex items-center gap-2 text-sm font-semibold">
           <ArrowLeft className="h-4 w-4" /> Back to users
         </Button>
@@ -66,7 +66,7 @@ export default function UserDetailPage() {
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
-          onClick={() => router.push(ROUTES.USERS)}
+          onClick={() => router.push(ROUTES.USERS.ROOT)}
           className="inline-flex items-center gap-2 text-sm font-semibold -ml-2 text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to users list
         </Button>
@@ -185,7 +185,7 @@ export default function UserDetailPage() {
           Order History ({orders.length})
         </h2>
 
-        {orders.length > 0 ? (
+        {orders?.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-border bg-muted/40 text-xs uppercase font-semibold text-muted-foreground">
@@ -198,30 +198,30 @@ export default function UserDetailPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {orders.map((ord: any) => (
+                {orders?.map((ord: any) => (
                   <tr
-                    key={ord._id}
+                    key={ord?._id}
                     className="hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-4 font-serif font-bold text-foreground">
-                      {ord.orderId}
+                      {ord?.orderId}
                     </td>
                     <td className="py-3 px-4">
                       <span
                         className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
-                          ord.status === "DELIVERED"
+                          ord?.status === "DELIVERED"
                             ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                             : "bg-amber-500/10 text-amber-600 border-amber-500/20"
                         }`}>
-                        {ord.status === "DELIVERED"
+                        {ord?.status === "DELIVERED"
                           ? "Delivered"
                           : "In Process"}
                       </span>
                     </td>
                     <td className="py-3 px-4 font-serif font-extrabold text-foreground">
-                      {formatPounds(ord.total)}
+                      {formatPounds(ord?.total)}
                     </td>
                     <td className="py-3 px-4 text-xs text-muted-foreground">
-                      {new Date(ord.createdAt).toLocaleDateString("en-GB", {
+                      {new Date(ord?.createdAt).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
@@ -229,7 +229,7 @@ export default function UserDetailPage() {
                     </td>
                     <td className="py-3 px-4 text-right">
                       <Link
-                        href={ROUTES.ORDER_DETAIL(ord._id)}
+                        href={ROUTES.ORDERS.DETAIL(ord?._id)}
                         className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
                         View Order
                       </Link>

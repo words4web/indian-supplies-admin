@@ -70,8 +70,7 @@ export default function CategoriesPage() {
             {
               label: "Edit",
               icon: <Pencil className="size-4" />,
-              onClick: () =>
-                router.push(`${ROUTES.CATEGORIES}/${row?._id}/edit`),
+              onClick: () => router.push(ROUTES.CATEGORIES.EDIT(row?._id)),
             },
             {
               label: "Delete",
@@ -94,7 +93,7 @@ export default function CategoriesPage() {
           id: "add-category-btn",
           label: "Add Category",
           icon: <Plus className="size-4" />,
-          onClick: () => router.push(`${ROUTES.CATEGORIES}/new`),
+          onClick: () => router.push(ROUTES.CATEGORIES.NEW),
         }}
       />
 
@@ -109,7 +108,7 @@ export default function CategoriesPage() {
           columns={columns}
           data={categories}
           keyExtractor={(row) => row?._id}
-          onRowClick={(row) => router.push(`${ROUTES.CATEGORIES}/${row?._id}`)}
+          onRowClick={(row) => router.push(ROUTES.CATEGORIES.DETAIL(row?._id))}
           emptyMessage="No categories found. Create your first one!"
         />
 

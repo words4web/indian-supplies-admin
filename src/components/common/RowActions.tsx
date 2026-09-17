@@ -51,7 +51,7 @@ export function RowActions({ actions, id }: RowActionsProps) {
 
   return (
     <>
-      <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+      <div className="flex justify-start" onClick={(e) => e.stopPropagation()}>
         <button
           ref={btnRef}
           id={id}

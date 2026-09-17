@@ -9,6 +9,7 @@ import {
   useAdminOrderDetailQuery,
   useUpdateOrderStatusMutation,
 } from "@/services/order/order.hook";
+import { ROUTES } from "@/constants/routes";
 import { OrderHeader } from "@/components/order/order-header";
 import { OrderCustomerDetails } from "@/components/order/order-customer-details";
 import { OrderItemsTable } from "@/components/order/order-items-table";
@@ -43,7 +44,7 @@ export default function OrderDetailPage() {
       <div className="space-y-6">
         <Button
           variant="ghost"
-          onClick={() => router.push("/orders")}
+          onClick={() => router.push(ROUTES.ORDERS.ROOT)}
           className="inline-flex items-center gap-2 text-sm font-semibold">
           <ArrowLeft className="h-4 w-4" /> Back to orders
         </Button>
@@ -69,7 +70,7 @@ export default function OrderDetailPage() {
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
-          onClick={() => router.push("/orders")}
+          onClick={() => router.push(ROUTES.ORDERS.ROOT)}
           className="inline-flex items-center gap-2 text-sm font-semibold -ml-2 text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to orders
         </Button>

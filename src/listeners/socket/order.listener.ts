@@ -25,7 +25,7 @@ export function registerOrderListener(
           ? {
               label: "View Order",
               onClick: () => {
-                const targetUrl = ROUTES.ORDER_DETAIL(data?._id!);
+                const targetUrl = ROUTES.ORDERS.DETAIL(data?._id!);
                 if (router) {
                   router.push(targetUrl);
                 } else {
