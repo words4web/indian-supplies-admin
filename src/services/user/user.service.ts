@@ -17,4 +17,12 @@ export const userService = {
     const response = await axiosInstance.get(API_ROUTES.USERS.DETAIL(id));
     return response.data;
   },
+
+  updateUserStatus: async (id: string, isActive: boolean) => {
+    const response = await axiosInstance.patch(
+      API_ROUTES.USERS.UPDATE_STATUS(id),
+      { isActive },
+    );
+    return response.data;
+  },
 };

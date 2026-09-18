@@ -27,6 +27,7 @@ export const API_ROUTES = {
   USERS: {
     LIST: "/admin/users",
     DETAIL: (id: string) => `/admin/users/${id}`,
+    UPDATE_STATUS: (id: string) => `/admin/users/${id}/status`,
   },
   UPLOAD: {
     GET_URLS: "/admin/upload/get-urls",

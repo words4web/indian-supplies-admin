@@ -11,11 +11,17 @@ import {
   PackageCheck,
   Phone,
   User as UserIcon,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/common/Loader";
 import { ErrorView } from "@/components/common/ErrorView";
-import { useUserDetailQuery } from "@/services/user/user.hook";
+import {
+  useUserDetailQuery,
+  useUpdateUserStatusMutation,
+} from "@/services/user/user.hook";
 import { formatPounds } from "@/lib/format";
 import { ROUTES } from "@/constants/routes";
 
@@ -35,6 +41,29 @@ export default function UserDetailPage() {
   const userData = responseBody?.data;
   const user = userData?.user;
   const orders = userData?.orders || [];
+
+  const updateStatusMutation = useUpdateUserStatusMutation();
+
+  const handleToggleStatus = (newStatus: boolean) => {
+    const action = newStatus ? "activate" : "deactivate";
+    if (confirm(`Are you sure you want to ${action} this customer account?`)) {
+      updateStatusMutation.mutate(
+        { id: userId, isActive: newStatus },
+        {
+          onSuccess: () => {
+            toast.success(
+              `Account ${newStatus ? "activated" : "deactivated"} successfully.`,
+            );
+          },
+          onError: (err: any) => {
+            toast.error(
+              err.response?.data?.message || `Failed to update status.`,
+            );
+          },
+        },
+      );
+    }
+  };
 
   if (isLoading) {
     return (
@@ -73,20 +102,53 @@ export default function UserDetailPage() {
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-6">
-        <div className="flex items-center gap-4 pb-4 border-b border-border">
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <UserIcon className="size-7" />
+        <div className="flex items-center justify-between pb-4 border-b border-border">
+          <div className="flex items-center gap-4">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <UserIcon className="size-7" />
+            </div>
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="font-serif text-2xl font-bold text-foreground">
+                  {user.fullName}
+                </h1>
+                <span
+                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    user.isActive
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  }`}>
+                  {user.isActive ? "Active" : "Pending Approval"}
+                </span>
+              </div>
+              <p className="text-sm font-medium text-muted-foreground mt-0.5">
+                {user.businessName
+                  ? `Business: ${user.businessName}`
+                  : "Individual Customer"}
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-serif text-2xl font-bold text-foreground">
-              {user.fullName}
-            </h1>
-            <p className="text-sm font-medium text-muted-foreground">
-              {user.businessName
-                ? `Business: ${user.businessName}`
-                : "Individual Customer"}
-            </p>
-          </div>
+
+          <Button
+            type="button"
+            variant={user.isActive ? "outline" : "default"}
+            disabled={updateStatusMutation.isPending}
+            onClick={() => handleToggleStatus(!user.isActive)}
+            className={`inline-flex items-center gap-2 font-semibold ${
+              user.isActive
+                ? "border-rose-200 text-rose-700 hover:bg-rose-50 dark:border-rose-800/40 dark:text-rose-400"
+                : "bg-emerald-600 text-white hover:bg-emerald-700"
+            }`}>
+            {user.isActive ? (
+              <>
+                <XCircle className="size-4" /> Deactivate Account
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="size-4" /> Approve & Activate Account
+              </>
+            )}
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">

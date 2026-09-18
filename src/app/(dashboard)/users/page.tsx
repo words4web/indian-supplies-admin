@@ -3,9 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye } from "lucide-react";
-import { useUsersQuery } from "@/services/user/user.hook";
+import { Eye, CheckCircle2, XCircle } from "lucide-react";
+import { toast } from "sonner";
+import {
+  useUsersQuery,
+  useUpdateUserStatusMutation,
+} from "@/services/user/user.hook";
 import { DataTable, TableColumn } from "@/components/common/DataTable";
+import { RowActions } from "@/components/common/RowActions";
 import { PageHeader } from "@/components/common/PageHeader";
 import { PageFilters } from "@/components/common/PageFilters";
 import { QueryBoundary } from "@/components/common/QueryBoundary";
@@ -35,6 +40,30 @@ export default function UsersPage() {
   const meta = responseBody?.meta || { totalPages: 1, total: 0 };
   const total = meta?.totalCount || meta?.total || users.length;
   const totalPages = meta?.totalPages || Math.ceil(total / LIMIT) || 1;
+
+  const updateStatusMutation = useUpdateUserStatusMutation();
+
+  const handleToggleStatus = (userId: string, currentStatus: boolean) => {
+    const newStatus = !currentStatus;
+    const action = newStatus ? "activate" : "deactivate";
+    if (confirm(`Are you sure you want to ${action} this customer account?`)) {
+      updateStatusMutation.mutate(
+        { id: userId, isActive: newStatus },
+        {
+          onSuccess: () => {
+            toast.success(
+              `Account ${newStatus ? "activated" : "deactivated"} successfully.`,
+            );
+          },
+          onError: (err: any) => {
+            toast.error(
+              err.response?.data?.message || `Failed to update status.`,
+            );
+          },
+        },
+      );
+    }
+  };
 
   const columns: TableColumn<any>[] = [
     {
@@ -66,11 +95,16 @@ export default function UsersPage() {
       ),
     },
     {
-      key: "addresses",
-      header: "Saved Addresses",
+      key: "isActive",
+      header: "Account Status",
       render: (row) => (
-        <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
-          {row.addresses?.length || 0} address(es)
+        <span
+          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+            row.isActive
+              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+          }`}>
+          {row.isActive ? "Active" : "Pending Approval"}
         </span>
       ),
     },
@@ -92,16 +126,28 @@ export default function UsersPage() {
     {
       key: "actions",
       header: "Actions",
-      className: "text-right w-24",
+      className: "text-right w-20",
       render: (row) => (
-        <div className="flex justify-end">
-          <Link
-            href={ROUTES.USERS.DETAIL(row?._id)}
-            onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-secondary">
-            <Eye className="size-3.5" /> View
-          </Link>
-        </div>
+        <RowActions
+          id={`actions-${row?._id}`}
+          actions={[
+            {
+              label: "View",
+              icon: <Eye className="size-4" />,
+              onClick: () => router.push(ROUTES.USERS.DETAIL(row?._id)),
+            },
+            {
+              label: row.isActive ? "Deactivate" : "Approve",
+              icon: row.isActive ? (
+                <XCircle className="size-4 text-rose-500" />
+              ) : (
+                <CheckCircle2 className="size-4 text-emerald-500" />
+              ),
+              variant: row.isActive ? "danger" : "default",
+              onClick: () => handleToggleStatus(row._id, !!row.isActive),
+            },
+          ]}
+        />
       ),
     },
   ];
