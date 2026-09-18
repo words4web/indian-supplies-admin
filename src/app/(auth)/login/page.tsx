@@ -43,7 +43,7 @@ export default function LoginPage() {
             Indian Supplies
           </h2>
           <span className="mt-2 text-sm font-semibold tracking-wider text-primary uppercase">
-            Admin Console
+            Management Portal
           </span>
         </div>
 
@@ -56,7 +56,7 @@ export default function LoginPage() {
               <input
                 {...register("email")}
                 type="email"
-                placeholder="admin@indiansupplies.com"
+                placeholder="name@indiansupplies.com"
                 className="h-14 w-full rounded-xl border border-input bg-background px-4 text-base font-normal outline-none transition-all placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
               {errors.email?.message && (

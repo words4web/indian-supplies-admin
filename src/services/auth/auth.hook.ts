@@ -23,6 +23,8 @@ export const useLogin = (options?: {
           name: user?.fullName,
           email: user?.email,
           business: user?.businessName || "",
+          role: user?.role,
+          permissions: user?.permissions || [],
           addresses: user?.addresses || [],
         },
         accessToken,

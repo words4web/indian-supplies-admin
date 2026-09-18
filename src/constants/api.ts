@@ -33,4 +33,11 @@ export const API_ROUTES = {
     GET_URLS: "/admin/upload/get-urls",
     CONFIRM: "/admin/upload/confirm",
   },
+  SALESMEN: {
+    LIST: "/admin/salesmen",
+    CREATE: "/admin/salesmen",
+    DETAIL: (id: string) => `/admin/salesmen/${id}`,
+    UPDATE: (id: string) => `/admin/salesmen/${id}`,
+    UPDATE_STATUS: (id: string) => `/admin/salesmen/${id}/status`,
+  },
 };

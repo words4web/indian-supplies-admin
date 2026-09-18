@@ -29,6 +29,8 @@ export const useProfile = (options?: { enabled?: boolean }) => {
         name: user?.fullName,
         email: user?.email,
         business: user?.businessName || "",
+        role: user?.role,
+        permissions: user?.permissions || [],
         addresses: user?.addresses || [],
       });
     }

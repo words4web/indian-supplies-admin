@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { AdminNotificationToggle } from "@/components/common/AdminNotificationToggle";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { LogOut, User as UserIcon, Mail, ShieldAlert } from "lucide-react";
+import { STAFF_ROLE_LABELS } from "@/types/auth/auth.types";
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
@@ -20,6 +21,9 @@ export default function SettingsPage() {
     });
   };
 
+  const roleLabel =
+    (user?.role && STAFF_ROLE_LABELS[user?.role]) || user?.role || "Staff";
+
   return (
     <div className="space-y-8 w-full max-w-4xl py-4">
       <div>
@@ -27,8 +31,7 @@ export default function SettingsPage() {
           Settings & Profile
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Manage your administrator profile settings, notifications, and
-          dashboard session.
+          Manage your profile settings, notifications, and dashboard session.
         </p>
       </div>
 
@@ -42,7 +45,7 @@ export default function SettingsPage() {
             </div>
             <div>
               <h2 className="font-serif text-xl font-bold text-foreground">
-                Administrator Profile
+                {roleLabel} Profile
               </h2>
             </div>
           </div>
@@ -83,7 +86,7 @@ export default function SettingsPage() {
               </span>
             </div>
             <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-              Super Administrator
+              {roleLabel}
             </span>
           </div>
         </div>

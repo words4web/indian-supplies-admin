@@ -21,6 +21,11 @@ export const ROUTES = {
     ROOT: "/users",
     DETAIL: (id: string) => `/users/${id}`,
   },
+  SALESMEN: {
+    ROOT: "/salesmen",
+    NEW: "/salesmen/new",
+    DETAIL: (id: string) => `/salesmen/${id}`,
+  },
   SETTINGS: "/settings",
   NOTIFICATIONS: "/notifications",
 };
@@ -31,6 +36,7 @@ export const PROTECTED_ROUTES = [
   ROUTES.ORDERS.ROOT,
   ROUTES.PRODUCTS.ROOT,
   ROUTES.USERS.ROOT,
+  ROUTES.SALESMEN.ROOT,
   ROUTES.SETTINGS,
   ROUTES.NOTIFICATIONS,
 ];

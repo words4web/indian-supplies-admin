@@ -6,7 +6,7 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 
 ## 1. Project Overview
 
-**Indian Supplies Admin** is the administrative portal for the Indian Supplies wholesale ordering platform. It enables administrators to manage retailer accounts, monitor active orders, update product & category catalogs, and configure platform settings.
+**Indian Supplies Admin** is the administrative and staff portal for the Indian Supplies wholesale ordering platform. It enables administrators and authorized salesmen to manage retailer accounts, monitor active orders, update product & category catalogs, manage staff credentials, and configure platform settings.
 
 ---
 
@@ -30,22 +30,26 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 ```
 ├── app/                      # Next.js App Router folders & pages
 │   ├── (auth)/               # Guest authentication views
-│   │   └── login/            # Admin email/password login page
-│   ├── (dashboard)/          # Protected admin panel pages
+│   │   └── login/            # Unified staff login page (Admin & Salesman)
+│   ├── (dashboard)/          # Protected admin/staff panel pages
 │   │   ├── categories/       # Category management (list, new, edit)
-│   │   ├── notifications/    # Dedicated Admin Notifications page (list, pagination, mark as read, order link)
+│   │   ├── notifications/    # Dedicated Admin Notifications page
 │   │   ├── orders/           # Order management
 │   │   │   ├── [id]/         # Order detail view (OrderHeader, OrderCustomerDetails, OrderItemsTable)
 │   │   │   └── page.tsx      # Admin orders table
 │   │   ├── products/         # Product management
-│   │   │   ├── [id]/         # Product View (`/products/[id]` with media gallery) & Edit (`/products/[id]/edit`)
+│   │   │   ├── [id]/         # Product View (`/products/[id]`) & Edit (`/products/[id]/edit`)
 │   │   │   ├── new/          # Product Creation page (`/products/new`)
-│   │   │   └── page.tsx      # Products listing page with URL-synced search/filter/pagination (sorted newest first)
-│   │   ├── settings/         # Settings page with AdminNotificationToggle
+│   │   │   └── page.tsx      # Products listing page (URL-synced search/filter/pagination)
+│   │   ├── salesmen/         # Salesman staff management
+│   │   │   ├── [id]/         # Salesman detail/edit view (permissions, status toggle button)
+│   │   │   ├── new/          # Salesman creation form (name, email, password, permissions checklist)
+│   │   │   └── page.tsx      # Paginated salesmen list (URL-synced search, email column, status badges)
+│   │   ├── settings/         # Settings & Staff Profile page with AdminNotificationToggle
 │   │   ├── users/            # Retailer user management
 │   │   │   ├── [id]/         # Retailer user detail view (profile, saved addresses, order history)
 │   │   │   └── page.tsx      # Paginated retailer accounts table with search
-│   │   ├── layout.tsx        # Dashboard layout with Sidebar & Header
+│   │   ├── layout.tsx        # Dashboard layout with unified collapsible Sidebar
 │   │   └── page.tsx          # Overview / Dashboard metrics page
 │   ├── globals.css           # Global Tailwind, base styles, and glassmorphism styling
 │   └── layout.tsx            # Root layout configuring Query, Redux, Socket, NuqsAdapter & AdminNotificationListener
@@ -56,60 +60,102 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 ├── components/               # React Components
 │   ├── category/             # Category domain components
 │   ├── common/               # Shared dashboard & UI components
-│   │   ├── CheckboxCard.tsx  # Styled checkbox wrapper for boolean feature flags (e.g. Is Active, VAT Applicable)
-│   │   ├── ConfirmModal.tsx  # Accessible modal for destructive actions & form confirmation (with isLoading state)
+│   │   ├── CheckboxCard.tsx  # Styled checkbox wrapper for boolean feature flags
+│   │   ├── ConfirmModal.tsx  # Accessible modal for destructive actions & form confirmation
 │   │   ├── DataTable.tsx     # Generic paginated table with dynamic column width skeletons & row actions
 │   │   ├── FormSection.tsx   # Card layout wrapper for grouping related form fields with titles & descriptions
-│   │   ├── ImageUploader.tsx # Ultra-compact inline image tile strip (max 3 images, 3MB size limit, inline + tile)
+│   │   ├── ImageUploader.tsx # Ultra-compact inline image tile strip (max 3 images, 3MB size limit)
 │   │   ├── Input.tsx         # Reusable form text/number input primitive
-│   │   ├── KeywordsInput.tsx # Tag/chip input component for managing string arrays (e.g., search keywords)
-│   │   ├── PageFilters.tsx   # Filter bar with debounced search input, category dropdown, clear filters button
+│   │   ├── KeywordsInput.tsx # Tag/chip input component for search keywords
+│   │   ├── PageFilters.tsx   # Filter bar with debounced search input, dropdowns, clear filters button
 │   │   ├── PageHeader.tsx    # Header with page title, subtitle stats, and primary action button
 │   │   ├── Pagination.tsx    # Smart ellipsis pagination control (`1 ... current ... total`)
-│   │   ├── RowActions.tsx    # Table row hover-action trigger menu (View, Edit, Delete)
+│   │   ├── RowActions.tsx    # Table row action trigger menu (View, Edit, Delete)
 │   │   ├── Select.tsx        # Custom accessible select dropdown component
-│   │   ├── Sidebar.tsx       # Main dashboard navigation sidebar
+│   │   ├── Sidebar.tsx       # Main dashboard navigation sidebar with role/permission filtering
 │   │   ├── Skeleton.tsx      # Loading skeleton primitives matching actual column widths
 │   │   └── Textarea.tsx      # Textarea component primitive
-│   ├── product/              # Product domain components
-│   │   └── ProductForm.tsx   # Reusable form component for create & edit product flows (zod + react-hook-form + ImageUploader)
+│   ├── product/              # Product domain components (ProductForm.tsx)
+│   ├── salesman/             # Salesman domain components (SalesmanForm.tsx)
 │   └── ui/                   # Low-level UI primitives (Button, Modal, etc.)
 │
 ├── constants/                # App Constants
-│   ├── api.ts                # Backend API routes mapping (including UPLOAD endpoints)
+│   ├── api.ts                # Backend API routes mapping
 │   ├── product.constants.ts  # Product defaults and unit options constants
-│   ├── routes.ts             # App router routing definitions
+│   ├── routes.ts             # App router routing definitions (including SALESMEN routes)
 │   └── storage.ts            # Local and session storage keys
 │
 ├── hooks/                    # Reusable Custom React Hooks
 │   ├── useAdminFcmLifecycle.ts # Admin FCM token lifecycle hook
-│   ├── useAuth.ts            # Authentication profile queries & status utilities
+│   ├── useAuth.ts            # Authentication profile queries, store hydration & role utilities
 │   ├── useDebounce.ts        # Input debouncing hook
-│   └── useProductFilters.ts  # Type-safe URL query parameter state management for Products page (`nuqs`)
+│   ├── useProductFilters.ts  # URL query parameter management for Products (`nuqs`)
+│   └── useSalesmanFilters.ts # URL query parameter management for Salesmen (`nuqs`)
 │
 ├── lib/                      # Core integration utilities
 │   ├── firebase.ts           # Firebase client SDK initialization & Messaging helpers
-│   ├── store/                # Redux slices configuration
 │   ├── axiosInstance.ts      # Axios request interceptor and refresh token queue
 │   ├── store.ts              # Redux store configurations & persist setup
 │   ├── format.ts             # Currency and numeric format helpers
 │   └── utils.ts              # Styling (cn/clsx/tailwind-merge) helper utilities
 │
 ├── services/                 # Service & React Query hooks
+│   ├── auth/                 # Auth API service & `useLogin` mutation hook
 │   ├── category/             # Category API service & hooks
 │   ├── notification/         # Notification API service & React Query hooks
 │   ├── order/                # Order API service & hooks
-│   ├── product/              # Product API service & React Query hooks (`useProducts`, `useProductDetail`, `useCreateProduct`, `useUpdateProduct`, `useDeleteProduct`)
-│   ├── upload/               # Direct S3 upload service (`uploadService.ts` with `uploadImages` and `processFormImages`)
+│   ├── product/              # Product API service & React Query hooks
+│   ├── salesman/             # Salesman API service & React Query hooks (`useSalesmen`, `useSalesman`, `useCreateSalesman`, `useUpdateSalesman`, `useToggleSalesmanStatus`)
+│   ├── upload/               # Direct S3 upload service
 │   └── user/                 # User API service & hooks
 │
-└── utils/                    # Utility scripts & helpers
-    └── fileValidation.ts     # Client-side image validation (3MB size, max 3 files, mime types)
+├── types/                    # TypeScript interfaces and enum declarations
+│   ├── auth/                 # AuthUser, EStaffRole, STAFF_ROLE_LABELS, AuthState
+│   ├── salesman.types.ts     # ISalesman, SalesmanPermission, SALESMAN_PERMISSION_LABELS
+│   └── common.types.ts       # SidebarProps, PageFiltersProps, DataTable column types
+│
+└── schemas/                  # Zod validation schemas
+    ├── auth.ts               # Login schema
+    ├── product.ts            # Product create/edit schemas
+    └── salesman.ts           # Salesman create/edit schemas
 ```
 
 ---
 
-## 4. Product Management & Form Workflow
+## 4. Unified Authentication & Role-Based Navigation
+
+- **Unified Login (`/login`)**:
+  - Unified entry point for all staff members (Admins and Salesmen).
+  - Handles `useLogin` mutation, persists auth state via Redux, and hydrates user profile (`id`, `fullName`, `email`, `role`, `permissions`).
+- **Dynamic Navigation Filtering (`Sidebar.tsx`)**:
+  - Centralized navigation definitions in `navigation.ts` with metadata flags (`adminOnly`, `permission`).
+  - Automatically filters sidebar links based on the authenticated staff member's role and permission array:
+    - **Admins** have access to all tabs (Overview, Categories, Products, Orders, Notifications, Salesmen, Users, Settings).
+    - **Salesmen** only see tabs permitted by their granular permissions (`category_management`, `product_management`, `order_management`, `user_management`), plus Overview and Settings. `Salesmen` and `Notifications` are hidden.
+- **Settings & Profile (`/settings`)**:
+  - Dynamically renders role badges (`Super Administrator`, `Sub Administrator`, `Salesman`) using `STAFF_ROLE_LABELS`.
+  - Accessible to all staff for account viewing, push notification toggling, and logging out.
+
+---
+
+## 5. Salesman Management Module
+
+- **Salesmen Directory (`/salesmen/page.tsx`)**:
+  - Paginated table displaying Name, Email, Creation Date, and Status badge (`Active` / `Inactive`).
+  - Search filter wired to URL query params using `useSalesmanFilters` (`nuqs`).
+  - Quick row actions: View (`/salesmen/[id]`) and Edit. (Deletion flow intentionally omitted per business rules).
+- **Salesman Create (`/salesmen/new/page.tsx`)**:
+  - Centered form card (`max-w-4xl`) capturing Full Name, Email, Password, and a visual permissions selector.
+  - Granular permissions with descriptive labels: Category Management, Product Management, Order Management, Create Orders, User Management.
+  - Redirects back to `/salesmen` upon successful creation.
+- **Salesman Edit & Status (`/salesmen/[id]/page.tsx`)**:
+  - Edit salesman details and permissions with confirmation.
+  - Direct status toggle button in the header card with confirmation modal for activating/deactivating accounts.
+  - Redirects back to the salesmen list upon saving changes.
+
+---
+
+## 6. Product Management & Form Workflow
 
 - **Product Form (`ProductForm.tsx`)**:
   - Reusable component shared by `/products/new` and `/products/[id]/edit`.
@@ -120,13 +166,11 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
   - When the user confirms in `ConfirmModal`, `uploadService.processFormImages` uploads pending `File` instances to S3, returns confirmed public URLs, and executes the create/update mutation.
   - Modal displays active loading state (`"Processing..."`) while uploading and saving.
 - **Product Detail View (`/products/[id]/page.tsx`)**:
-  - Full-width clean card layout displaying product metadata, pricing, category, pack size, VAT status, and Product Media gallery displaying all uploaded product images.
-- **Product Navigation & History**:
-  - Direct back button handling preserving user navigation history and modal prompt on discarding unsaved changes.
+  - Clean card layout displaying product metadata, pricing, category, pack size, VAT status, and Product Media gallery.
 
 ---
 
-## 5. UI Component Library & Shared Controls
+## 7. UI Component Library & Shared Controls
 
 - **`ImageUploader.tsx` & Client Validation (`fileValidation.ts`)**:
   - Ultra-compact inline thumbnail strip (`w-20 h-20` / `w-24 h-24`) with inline `+ Add Image` tile button.
@@ -142,11 +186,11 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 
 ---
 
-## 6. URL State Management (`nuqs`) & Filtering
+## 8. URL State Management (`nuqs`) & Filtering
 
 - **Nuqs Integration**: `NuqsAdapter` wrapped in root `layout.tsx` for type-safe Next.js App Router URL search parameter synchronization.
-- **Product Filters Hook (`useProductFilters.ts`)**:
-  - Encapsulates `page`, `search`, and `category` search params using `useQueryState` and `useQueryStates`.
+- **Filters Hooks (`useProductFilters.ts`, `useSalesmanFilters.ts`)**:
+  - Encapsulates `page`, `search`, and custom filter params using `useQueryState` and `useQueryStates`.
   - Configured with `shallow: true` and `history: "push"` for seamless browser back/forward history navigation without losing state on page reloads.
 - **Controlled Page Filters Component (`PageFilters.tsx`)**:
-  - Uses guarded `useDebounce` (500ms) for local input state (`debouncedValue !== searchQuery`) to eliminate unnecessary API requests while typing and prevent URL parameter resetting on page reloads/mount.
+  - Uses guarded `useDebounce` (500ms) for local input state (`debouncedValue !== searchQuery`) to eliminate unnecessary API requests while typing.

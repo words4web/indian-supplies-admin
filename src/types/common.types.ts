@@ -11,11 +11,7 @@ export interface ErrorViewProps {
 }
 
 export interface SidebarProps {
-  sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
   pathname: string;
-  user: any;
-  handleSignOut: () => void;
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
 }
