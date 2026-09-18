@@ -93,11 +93,7 @@ export default function OrdersPage() {
       key: "itemsCount",
       header: "Items",
       render: (row) => {
-        const count =
-          row.items?.reduce(
-            (acc: number, item: any) => acc + (item.quantity || 0),
-            0,
-          ) || 0;
+        const count = row?.items?.length || 0;
         return <span className="font-semibold">{count}</span>;
       },
     },

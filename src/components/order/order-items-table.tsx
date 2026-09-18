@@ -1,8 +1,8 @@
 "use client";
 
-import { CreditCard } from "lucide-react";
+import { CreditCard, Package } from "lucide-react";
 import { formatPounds } from "@/lib/format";
-
+import { DataTable, TableColumn } from "@/components/common/DataTable";
 import { OrderItemsTableProps } from "@/types/order.types";
 
 export function OrderItemsTable({
@@ -11,32 +11,111 @@ export function OrderItemsTable({
   vat,
   total,
 }: OrderItemsTableProps) {
-  const totalItems =
-    items?.reduce((acc, item) => acc + (item?.quantity || 0), 0) || 0;
+  const columns: TableColumn<any>[] = [
+    {
+      key: "productName",
+      header: "Product Name",
+      className: "min-w-[380px] w-[40%]",
+      render: (row) => {
+        const imageUrl = row?.productId?.images?.[0];
+        return (
+          <div className="flex items-center gap-3">
+            <div className="size-10 rounded-lg border border-border/80 bg-muted/40 overflow-hidden flex items-center justify-center shrink-0">
+              {imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={imageUrl}
+                  alt={row?.productId?.name || "Product"}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Package className="size-4 text-muted-foreground/60" />
+              )}
+            </div>
+            <p className="font-semibold text-foreground">
+              {row?.productId?.name || "Deleted Product"}
+            </p>
+          </div>
+        );
+      },
+    },
+    {
+      key: "pack",
+      header: "Pack Size",
+      render: (row) => (
+        <span className="text-muted-foreground font-medium">
+          {row?.productId?.pack || "N/A"}
+        </span>
+      ),
+    },
+    {
+      key: "quantity",
+      header: "Quantity",
+      render: (row) => (
+        <span className="inline-flex items-center justify-center min-w-8 px-2 py-0.5 rounded-md bg-muted font-bold text-foreground">
+          {row?.quantity}
+        </span>
+      ),
+    },
+    {
+      key: "price",
+      header: "Price at Order",
+      render: (row) => (
+        <span className="font-medium text-muted-foreground">
+          {formatPounds(row?.price || 0)}
+        </span>
+      ),
+    },
+    {
+      key: "tax",
+      header: "Tax (VAT)",
+      render: (row) => {
+        const isVat = row?.isVatApplicable ?? false;
+        const itemSubtotal = (row?.price || 0) * (row?.quantity || 0);
+        const itemVat = isVat ? itemSubtotal * 0.2 : 0;
+
+        if (!isVat || itemVat === 0) {
+          return <span className="text-muted-foreground font-medium">N/A</span>;
+        }
+
+        return (
+          <span className="font-medium text-foreground">
+            {formatPounds(itemVat)}
+          </span>
+        );
+      },
+    },
+    {
+      key: "totalPrice",
+      header: "Total Price",
+      render: (row) => (
+        <span className="font-bold text-foreground">
+          {formatPounds((row?.price || 0) * (row?.quantity || 0))}
+        </span>
+      ),
+    },
+  ];
 
   return (
-    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden mb-8">
       <div className="p-6 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <CreditCard className="size-5 text-primary" />
           <h2 className="font-serif text-lg font-bold text-foreground">
-            Items Ordered ({totalItems})
+            Items Ordered ({items?.length || 0})
           </h2>
         </div>
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground bg-muted px-3 py-1 rounded-full">
-          {items?.length || 0} unique items
-        </span>
       </div>
 
       <div className="bg-muted/30 p-6 flex flex-col items-end border-b border-border">
         <div className="w-full max-w-xs space-y-2.5 text-sm">
-          <div className="flex justify-between text-muted-foreground">
+          <div className="flex justify-between text-white">
             <span>Subtotal</span>
             <span className="font-semibold text-foreground">
               {formatPounds(subtotal)}
             </span>
           </div>
-          <div className="flex justify-between text-muted-foreground">
+          <div className="flex justify-between text-white">
             <span>VAT (20%)</span>
             <span className="font-semibold text-foreground">
               {formatPounds(vat)}
@@ -51,50 +130,13 @@ export function OrderItemsTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="bg-muted/40 text-muted-foreground text-xs uppercase tracking-wider font-semibold">
-              <th className="px-6 py-3.5">Product Name</th>
-              <th className="px-6 py-3.5">Pack Size</th>
-              <th className="px-6 py-3.5 text-center">Quantity</th>
-              <th className="px-6 py-3.5 text-right">Price at Order</th>
-              <th className="px-6 py-3.5 text-right">Total Price</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/60">
-            {items?.map((item, index) => (
-              <tr
-                key={item?.productId?._id || `item-${index}`}
-                className="hover:bg-muted/20 transition-colors">
-                <td className="px-6 py-4">
-                  <p className="font-semibold text-foreground">
-                    {item?.productId?.name || "Deleted Product"}
-                  </p>
-                  {item?.productId?.slug && (
-                    <p className="text-xs text-muted-foreground font-mono truncate max-w-xs">
-                      {item?.productId?.slug}
-                    </p>
-                  )}
-                </td>
-                <td className="px-6 py-4 text-muted-foreground font-medium">
-                  {item?.productId?.pack || "N/A"}
-                </td>
-                <td className="px-6 py-4 text-center font-bold">
-                  <span className="inline-flex items-center justify-center min-w-8 px-2 py-0.5 rounded-md bg-muted font-bold text-foreground">
-                    {item?.quantity}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right font-medium text-muted-foreground">
-                  {formatPounds(item?.price || 0)}
-                </td>
-                <td className="px-6 py-4 text-right font-bold text-foreground">
-                  {formatPounds((item?.price || 0) * (item?.quantity || 0))}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="overflow-x-auto max-h-[480px] overflow-y-auto">
+        <DataTable
+          columns={columns}
+          data={items || []}
+          keyExtractor={(row, index) => row?.productId?._id || `item-${index}`}
+          emptyMessage="No items found in this order."
+        />
       </div>
     </div>
   );

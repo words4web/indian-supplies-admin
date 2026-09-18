@@ -15,7 +15,7 @@ export interface TableColumn<T> {
 interface DataTableProps<T> {
   columns: TableColumn<T>[];
   data: T[];
-  keyExtractor: (row: T) => string;
+  keyExtractor: (row: T, index: number) => string;
   sortKey?: string;
   sortDir?: "asc" | "desc";
   onSort?: (key: string) => void;
@@ -102,9 +102,9 @@ export function DataTable<T>({
               </td>
             </tr>
           ) : (
-            data?.map((row) => (
+            data?.map((row, idx) => (
               <tr
-                key={keyExtractor(row)}
+                key={keyExtractor(row, idx)}
                 onClick={() => onRowClick?.(row)}
                 className={`group border-b border-border/50 last:border-0 hover:bg-muted/30 transition-colors ${onRowClick ? "cursor-pointer" : ""}`}>
                 {columns?.map((col) => (

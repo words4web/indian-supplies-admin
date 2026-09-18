@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -22,6 +23,7 @@ import {
   useUserDetailQuery,
   useUpdateUserStatusMutation,
 } from "@/services/user/user.hook";
+import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { formatPounds } from "@/lib/format";
 import { ROUTES } from "@/constants/routes";
 
@@ -29,6 +31,7 @@ export default function UserDetailPage() {
   const params = useParams();
   const router = useRouter();
   const userId = params?.id as string;
+  const [showStatusConfirm, setShowStatusConfirm] = useState(false);
 
   const {
     data: responseBody,
@@ -44,25 +47,25 @@ export default function UserDetailPage() {
 
   const updateStatusMutation = useUpdateUserStatusMutation();
 
-  const handleToggleStatus = (newStatus: boolean) => {
-    const action = newStatus ? "activate" : "deactivate";
-    if (confirm(`Are you sure you want to ${action} this customer account?`)) {
-      updateStatusMutation.mutate(
-        { id: userId, isActive: newStatus },
-        {
-          onSuccess: () => {
-            toast.success(
-              `Account ${newStatus ? "activated" : "deactivated"} successfully.`,
-            );
-          },
-          onError: (err: any) => {
-            toast.error(
-              err.response?.data?.message || `Failed to update status.`,
-            );
-          },
+  const handleConfirmStatusChange = () => {
+    if (!user) return;
+    const newStatus = !user.isActive;
+    updateStatusMutation.mutate(
+      { id: userId, isActive: newStatus },
+      {
+        onSuccess: () => {
+          toast.success(
+            `Account ${newStatus ? "activated" : "deactivated"} successfully.`,
+          );
+          setShowStatusConfirm(false);
         },
-      );
-    }
+        onError: (err: any) => {
+          toast.error(
+            err.response?.data?.message || `Failed to update status.`,
+          );
+        },
+      },
+    );
   };
 
   if (isLoading) {
@@ -133,12 +136,12 @@ export default function UserDetailPage() {
             type="button"
             variant={user.isActive ? "outline" : "default"}
             disabled={updateStatusMutation.isPending}
-            onClick={() => handleToggleStatus(!user.isActive)}
-            className={`inline-flex items-center gap-2 font-semibold ${
+            onClick={() => setShowStatusConfirm(true)}
+            className={
               user.isActive
-                ? "border-rose-200 text-rose-700 hover:bg-rose-50 dark:border-rose-800/40 dark:text-rose-400"
+                ? "border-rose-200 text-rose-700 bg-rose-50/50 hover:bg-rose-100 hover:text-rose-800 dark:border-rose-800/40 dark:bg-rose-950/20 dark:text-rose-400 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
                 : "bg-emerald-600 text-white hover:bg-emerald-700"
-            }`}>
+            }>
             {user.isActive ? (
               <>
                 <XCircle className="size-4" /> Deactivate Account
@@ -310,6 +313,23 @@ export default function UserDetailPage() {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={showStatusConfirm}
+        onClose={() => setShowStatusConfirm(false)}
+        onConfirm={handleConfirmStatusChange}
+        title={
+          user.isActive ? "Deactivate Account" : "Approve & Activate Account"
+        }
+        description={
+          user.isActive
+            ? `Are you sure you want to deactivate ${user.fullName}'s account? They will be logged out and cannot place orders.`
+            : `Are you sure you want to approve and activate ${user.fullName}'s account? They will be able to log in and place orders.`
+        }
+        confirmText={user.isActive ? "Deactivate" : "Approve Account"}
+        variant={user.isActive ? "destructive" : "default"}
+        isLoading={updateStatusMutation.isPending}
+      />
     </div>
   );
 }

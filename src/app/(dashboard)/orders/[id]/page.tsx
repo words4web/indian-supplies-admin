@@ -83,6 +83,8 @@ export default function OrderDetailPage() {
         total={order?.total}
         isDelivered={isDelivered}
         isUpdating={updateStatusMutation.isPending}
+        invoiceUrl={order?.invoiceUrl}
+        deliveryNoteUrl={order?.deliveryNoteUrl}
         onUpdateStatus={handleUpdateStatus}
       />
 

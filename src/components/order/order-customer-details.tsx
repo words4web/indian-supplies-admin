@@ -70,10 +70,10 @@ export function OrderCustomerDetails({
           </p>
           {delivery?.notes && (
             <div className="mt-4 border-t border-border/60 pt-3">
-              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-white mb-1">
                 <FileText className="size-3.5 text-primary" /> Delivery Notes
               </span>
-              <p className="text-xs text-muted-foreground italic bg-muted/50 p-2.5 rounded-lg border border-border/40 leading-relaxed">
+              <p className="text-dm text-white italic bg-muted/50 p-2.5 rounded-lg border border-border/40 leading-relaxed">
                 &ldquo;{delivery?.notes}&rdquo;
               </p>
             </div>

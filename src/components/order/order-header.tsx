@@ -1,8 +1,13 @@
 import { useState } from "react";
-import { ShoppingBag, CheckCircle2, Clock } from "lucide-react";
+import {
+  ShoppingBag,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Truck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
-import { formatPounds } from "@/lib/format";
 
 import { OrderHeaderProps } from "@/types/order.types";
 
@@ -12,6 +17,8 @@ export function OrderHeader({
   total,
   isDelivered,
   isUpdating,
+  deliveryNoteUrl,
+  invoiceUrl,
   onUpdateStatus,
 }: OrderHeaderProps) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -53,22 +60,39 @@ export function OrderHeader({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="text-right">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">
-              Total Order Amount
-            </span>
-            <span className="font-serif text-2xl sm:text-3xl font-extrabold text-primary">
-              {formatPounds(total)}
-            </span>
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {invoiceUrl && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                window.open(invoiceUrl, "_blank", "noopener,noreferrer")
+              }
+              className="gap-1.5 font-semibold text-xs h-9 cursor-pointer">
+              <FileText className="size-3.5 text-primary" />
+              Invoice
+            </Button>
+          )}
+
+          {deliveryNoteUrl && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                window.open(deliveryNoteUrl, "_blank", "noopener,noreferrer")
+              }
+              className="gap-1.5 font-semibold text-xs h-9 cursor-pointer">
+              <Truck className="size-3.5 text-primary" />
+              Delivery Note
+            </Button>
+          )}
 
           {!isDelivered && (
             <Button
-              size="lg"
+              size="sm"
               disabled={isUpdating}
               onClick={() => setShowConfirmModal(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-sm cursor-pointer">
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-sm cursor-pointer h-9">
               {isUpdating ? "Updating…" : "Mark as Delivered"}
             </Button>
           )}

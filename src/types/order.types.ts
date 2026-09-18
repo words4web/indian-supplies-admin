@@ -15,10 +15,14 @@ export interface OrderItem {
         name: string;
         pack?: string;
         price?: number;
+        unit?: string;
+        images?: string[];
+        isActive?: boolean;
       }
     | string;
   quantity: number;
   price: number;
+  isVatApplicable?: boolean;
 }
 
 export interface OrderRow {
@@ -37,6 +41,8 @@ export interface OrderRow {
   total: number;
   delivery: DeliveryDetails;
   status: OrderStatus;
+  deliveryNoteUrl?: string;
+  invoiceUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -56,6 +62,8 @@ export interface OrderHeaderProps {
   total?: number;
   isDelivered: boolean;
   isUpdating: boolean;
+  deliveryNoteUrl?: string;
+  invoiceUrl?: string;
   onUpdateStatus: (status: "DELIVERED" | "IN_PROCESS") => void;
 }
 
@@ -80,11 +88,14 @@ export interface OrderItemsTableProps {
     productId?: {
       _id?: string;
       name?: string;
-      slug?: string;
       pack?: string;
+      unit?: string;
+      images?: string[];
+      isActive?: boolean;
     };
     quantity: number;
     price: number;
+    isVatApplicable?: boolean;
   }>;
   subtotal?: number;
   vat?: number;

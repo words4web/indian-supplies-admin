@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -15,6 +14,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { PageFilters } from "@/components/common/PageFilters";
 import { QueryBoundary } from "@/components/common/QueryBoundary";
 import { Pagination } from "@/components/common/Pagination";
+import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { ROUTES } from "@/constants/routes";
 
 const LIMIT = 10;
@@ -23,6 +23,11 @@ export default function UsersPage() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusConfirmUser, setStatusConfirmUser] = useState<{
+    id: string;
+    fullName: string;
+    currentStatus: boolean;
+  } | null>(null);
 
   const {
     data: responseBody,
@@ -43,26 +48,25 @@ export default function UsersPage() {
 
   const updateStatusMutation = useUpdateUserStatusMutation();
 
-  const handleToggleStatus = (userId: string, currentStatus: boolean) => {
-    const newStatus = !currentStatus;
-    const action = newStatus ? "activate" : "deactivate";
-    if (confirm(`Are you sure you want to ${action} this customer account?`)) {
-      updateStatusMutation.mutate(
-        { id: userId, isActive: newStatus },
-        {
-          onSuccess: () => {
-            toast.success(
-              `Account ${newStatus ? "activated" : "deactivated"} successfully.`,
-            );
-          },
-          onError: (err: any) => {
-            toast.error(
-              err.response?.data?.message || `Failed to update status.`,
-            );
-          },
+  const handleConfirmStatusChange = () => {
+    if (!statusConfirmUser) return;
+    const newStatus = !statusConfirmUser.currentStatus;
+    updateStatusMutation.mutate(
+      { id: statusConfirmUser.id, isActive: newStatus },
+      {
+        onSuccess: () => {
+          toast.success(
+            `Account ${newStatus ? "activated" : "deactivated"} successfully.`,
+          );
+          setStatusConfirmUser(null);
         },
-      );
-    }
+        onError: (err: any) => {
+          toast.error(
+            err.response?.data?.message || `Failed to update status.`,
+          );
+        },
+      },
+    );
   };
 
   const columns: TableColumn<any>[] = [
@@ -144,7 +148,12 @@ export default function UsersPage() {
                 <CheckCircle2 className="size-4 text-emerald-500" />
               ),
               variant: row.isActive ? "danger" : "default",
-              onClick: () => handleToggleStatus(row._id, !!row.isActive),
+              onClick: () =>
+                setStatusConfirmUser({
+                  id: row._id,
+                  fullName: row.fullName || "this customer",
+                  currentStatus: !!row.isActive,
+                }),
             },
           ]}
         />
@@ -201,6 +210,27 @@ export default function UsersPage() {
           isLoading={isFetching}
         />
       </QueryBoundary>
+
+      <ConfirmModal
+        isOpen={!!statusConfirmUser}
+        onClose={() => setStatusConfirmUser(null)}
+        onConfirm={handleConfirmStatusChange}
+        title={
+          statusConfirmUser?.currentStatus
+            ? "Deactivate Account"
+            : "Approve & Activate Account"
+        }
+        description={
+          statusConfirmUser?.currentStatus
+            ? `Are you sure you want to deactivate ${statusConfirmUser.fullName}'s account? They will be logged out and cannot place orders.`
+            : `Are you sure you want to approve and activate ${statusConfirmUser?.fullName}'s account? They will be able to log in and place orders.`
+        }
+        confirmText={
+          statusConfirmUser?.currentStatus ? "Deactivate" : "Approve Account"
+        }
+        variant={statusConfirmUser?.currentStatus ? "destructive" : "default"}
+        isLoading={updateStatusMutation.isPending}
+      />
     </div>
   );
 }
