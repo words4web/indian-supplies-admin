@@ -16,6 +16,18 @@ export const productService = {
     return response?.data;
   },
 
+  getCatalog: async (params?: {
+    page?: number;
+    limit?: number;
+    categoryId?: string;
+    search?: string;
+  }) => {
+    const response = await axiosInstance.get(API_ROUTES.PRODUCTS.CATALOG, {
+      params,
+    });
+    return response?.data;
+  },
+
   getDetail: async (id: string) => {
     const response = await axiosInstance.get(API_ROUTES.PRODUCTS.DETAIL(id));
     return response?.data;

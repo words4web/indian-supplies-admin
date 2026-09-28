@@ -16,17 +16,38 @@ export const productKeys = {
   detail: (id: string) => [...productKeys.details(), id] as const,
 };
 
-export const useProducts = (params?: {
-  page?: number;
-  limit?: number;
-  categoryId?: string;
-  isActive?: boolean;
-  search?: string;
-}) => {
+export const useProducts = (
+  params?: {
+    page?: number;
+    limit?: number;
+    categoryId?: string;
+    isActive?: boolean;
+    search?: string;
+  },
+  enabled = true,
+) => {
   return useQuery({
     queryKey: productKeys.list(params || {}),
     queryFn: () => productService.list(params),
     placeholderData: keepPreviousData,
+    enabled,
+  });
+};
+
+export const useProductCatalog = (
+  params?: {
+    page?: number;
+    limit?: number;
+    categoryId?: string;
+    search?: string;
+  },
+  enabled = true,
+) => {
+  return useQuery({
+    queryKey: ["admin", "products", "catalog", params || {}],
+    queryFn: () => productService.getCatalog(params),
+    placeholderData: keepPreviousData,
+    enabled,
   });
 };
 

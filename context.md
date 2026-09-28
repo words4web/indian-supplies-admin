@@ -36,7 +36,8 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 │   │   ├── notifications/    # Dedicated Admin Notifications page
 │   │   ├── orders/           # Order management
 │   │   │   ├── [id]/         # Order detail view (OrderHeader, OrderCustomerDetails, OrderItemsTable)
-│   │   │   └── page.tsx      # Admin orders table
+│   │   │   ├── new/          # Admin/Salesman manual order placement page (`/orders/new`)
+│   │   │   └── page.tsx      # Admin orders table with "+ Create Order" action
 │   │   ├── products/         # Product management
 │   │   │   ├── [id]/         # Product View (`/products/[id]`) & Edit (`/products/[id]/edit`)
 │   │   │   ├── new/          # Product Creation page (`/products/new`)
@@ -75,14 +76,18 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 │   │   ├── Sidebar.tsx       # Main dashboard navigation sidebar with role/permission filtering
 │   │   ├── Skeleton.tsx      # Loading skeleton primitives matching actual column widths
 │   │   └── Textarea.tsx      # Textarea component primitive
+│   ├── order/                # Order creation & builder components
+│   │   ├── CustomerSelector.tsx # Debounced customer search (>= 2 chars) with address dropdown preview
+│   │   ├── ProductSelector.tsx  # Cached product search catalog with category filtering & quantity selector
+│   │   └── OrderSummaryCard.tsx # Sticky real-time subtotal, 20% VAT calculation, notes, and submit action
 │   ├── product/              # Product domain components (ProductForm.tsx)
 │   ├── salesman/             # Salesman domain components (SalesmanForm.tsx)
 │   └── ui/                   # Low-level UI primitives (Button, Modal, etc.)
 │
 ├── constants/                # App Constants
-│   ├── api.ts                # Backend API routes mapping
+│   ├── api.ts                # Backend API routes mapping (including /admin/orders and /admin/products/catalog)
 │   ├── product.constants.ts  # Product defaults and unit options constants
-│   ├── routes.ts             # App router routing definitions (including SALESMEN routes)
+│   ├── routes.ts             # App router routing definitions (including ORDERS.NEW and SALESMEN routes)
 │   └── storage.ts            # Local and session storage keys
 │
 ├── hooks/                    # Reusable Custom React Hooks
@@ -146,7 +151,7 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
   - Quick row actions: View (`/salesmen/[id]`) and Edit. (Deletion flow intentionally omitted per business rules).
 - **Salesman Create (`/salesmen/new/page.tsx`)**:
   - Centered form card (`max-w-4xl`) capturing Full Name, Email, Password, and a visual permissions selector.
-  - Granular permissions with descriptive labels: Category Management, Product Management, Order Management, Create Orders, User Management.
+  - Granular permissions with descriptive labels: Category Management, Product Management, Order Management, Create Orders (`order_create`), User Management.
   - Redirects back to `/salesmen` upon successful creation.
 - **Salesman Edit & Status (`/salesmen/[id]/page.tsx`)**:
   - Edit salesman details and permissions with confirmation.
@@ -155,7 +160,28 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
 
 ---
 
-## 6. Product Management & Form Workflow
+## 6. Manual Wholesale Order Creation Module (`/orders/new`)
+
+- **Role & Permission Gated**: Accessible to Super/Sub Admins and Salesmen with the `order_create` permission.
+- **Three-Step Order Builder Flow**:
+  1. **Customer Selection (`CustomerSelector.tsx`)**:
+     - Debounced customer lookup (`useUsersQuery`, enabled only when search query is at least 2 characters).
+     - Selecting a customer automatically populates their saved delivery address dropdown with a detailed snapshot preview.
+  2. **Product Catalog Search & Selection (`ProductSelector.tsx`)**:
+     - Fast cached catalog search (`useProductCatalog` calling `GET /api/v1/admin/products/catalog`).
+     - Query enabled only when searching (>= 2 chars) or selecting a category from the dropdown filter.
+     - Interactive unit price preview, VAT status indicator, and quantity step counter (`+` / `-`).
+  3. **Order Summary & Review (`OrderSummaryCard.tsx`)**:
+     - Real-time subtotal, 20% VAT calculation for VAT-applicable items, and grand total.
+     - Optional delivery notes textarea.
+     - Confirm modal review before submitting the final wholesale order.
+- **Confirmation-First Placement**:
+  - Triggers `useCreateAdminOrder` mutation (`POST /api/v1/admin/orders`).
+  - Automatically redirects to the newly created order detail page (`/orders/[id]`).
+
+---
+
+## 7. Product Management & Form Workflow
 
 - **Product Form (`ProductForm.tsx`)**:
   - Reusable component shared by `/products/new` and `/products/[id]/edit`.

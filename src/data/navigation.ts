@@ -2,6 +2,7 @@ import { ROUTES } from "@/constants/routes";
 import {
   LayoutDashboard,
   ShoppingBag,
+  ShoppingCart,
   Package,
   Tag,
   Users,
@@ -39,6 +40,12 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     href: ROUTES.ORDERS.ROOT,
     icon: ShoppingBag,
     permission: "order_management",
+  },
+  {
+    name: "Create Order",
+    href: ROUTES.ORDERS.NEW,
+    icon: ShoppingCart,
+    permission: "order_create",
   },
   {
     name: "Notifications",

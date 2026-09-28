@@ -9,6 +9,7 @@ export const ROUTES = {
   },
   ORDERS: {
     ROOT: "/orders",
+    NEW: "/orders/new",
     DETAIL: (id: string) => `/orders/${id}`,
   },
   PRODUCTS: {

@@ -1,13 +1,13 @@
-import { Product } from "./product/product.types";
+import { ProductRow } from "./product/product.types";
 
 export interface CartItem {
-  product: Product;
+  product: ProductRow;
   quantity: number;
 }
 
 export interface CartContextValue {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number) => void;
+  addItem: (product: ProductRow, quantity?: number) => void;
   updateQuantity: (id: string, quantity: number) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;

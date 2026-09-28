@@ -22,6 +22,23 @@ export const useAdminOrderDetailQuery = (id: string) => {
   });
 };
 
+export const useCreateAdminOrderMutation = (options?: {
+  onSuccess?: (data: any) => void;
+}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: orderService.create,
+    onSuccess: (data) => {
+      toast.success(data?.message || "Order created successfully.");
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+      options?.onSuccess?.(data);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to create order.");
+    },
+  });
+};
+
 export const useUpdateOrderStatusMutation = (options?: {
   onSuccess?: () => void;
 }) => {

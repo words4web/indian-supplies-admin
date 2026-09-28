@@ -63,3 +63,36 @@ export function formatDateTime(
 ): string {
   return formatDate(dateValue, { includeTime: true, includeSeconds });
 }
+
+export function formatAddress(
+  address?: {
+    streetAddress?: string;
+    building?: string;
+    city?: string;
+    postalCode?: string;
+  } | null,
+): string {
+  if (!address) return "";
+  return [
+    address?.streetAddress,
+    address?.building,
+    address?.city,
+    address?.postalCode,
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
+export function getAddressOptions(
+  addresses: any[] = [],
+  fallbackName?: string,
+): { value: string; label: string }[] {
+  return addresses.map((addr) => {
+    const formatted = formatAddress(addr);
+    const label = `${addr?.fullName || fallbackName || "Contact"} - ${formatted}`;
+    return {
+      value: addr?._id,
+      label,
+    };
+  });
+}

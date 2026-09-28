@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye } from "lucide-react";
+import { Eye, PlusCircle } from "lucide-react";
 import { useAdminOrdersQuery } from "@/services/order/order.hook";
 import { DataTable, TableColumn } from "@/components/common/DataTable";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -13,14 +13,23 @@ import { Pagination } from "@/components/common/Pagination";
 import { formatPounds } from "@/lib/format";
 import { formatDate } from "@/utils/format";
 import { ROUTES } from "@/constants/routes";
+import { useAuth } from "@/hooks/useAuth";
+import { EStaffRole } from "@/types/auth/auth.types";
 
 const LIMIT = 10;
 
 export default function OrdersPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  const canCreateOrder =
+    user?.role === EStaffRole.SUPER_ADMIN ||
+    user?.role === EStaffRole.SUB_ADMIN ||
+    (Array.isArray(user?.permissions) &&
+      user.permissions.includes("order_create"));
 
   const {
     data: responseBody,
@@ -137,6 +146,16 @@ export default function OrdersPage() {
       <PageHeader
         title="Orders"
         subtitle={`${total} ${total === 1 ? "order request" : "order requests"} total`}
+        action={
+          canCreateOrder
+            ? {
+                label: "Create Order",
+                onClick: () => router.push(ROUTES.ORDERS.NEW),
+                icon: <PlusCircle className="size-4 mr-1.5" />,
+                variant: "default",
+              }
+            : undefined
+        }
       />
 
       <PageFilters

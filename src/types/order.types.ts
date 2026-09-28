@@ -76,6 +76,7 @@ export interface OrderCustomerDetailsProps {
     notes?: string;
   };
   userId?: {
+    _id?: string;
     name?: string;
     business?: string;
     email?: string;
@@ -100,4 +101,38 @@ export interface OrderItemsTableProps {
   subtotal?: number;
   vat?: number;
   total?: number;
+}
+
+export interface SelectedOrderItem {
+  productId: string;
+  name: string;
+  price: number;
+  pack?: string;
+  unit?: string;
+  image?: string;
+  isVatApplicable?: boolean;
+  quantity: number;
+}
+
+export interface CustomerSelectorProps {
+  selectedUserId: string;
+  selectedAddressId: string;
+  onSelectCustomer: (userId: string) => void;
+  onSelectAddress: (addressId: string) => void;
+}
+
+export interface ProductSelectorProps {
+  selectedItems: SelectedOrderItem[];
+  onAddItem: (product: any) => void;
+  onUpdateQuantity: (productId: string, quantity: number) => void;
+  onRemoveItem: (productId: string) => void;
+}
+
+export interface OrderSummaryCardProps {
+  selectedItems: SelectedOrderItem[];
+  notes: string;
+  onNotesChange: (notes: string) => void;
+  onSubmitOrder: () => void;
+  isValid: boolean;
+  isSubmitting: boolean;
 }
