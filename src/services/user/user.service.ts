@@ -25,4 +25,15 @@ export const userService = {
     );
     return response.data;
   },
+
+  updateUserCredit: async (
+    id: string,
+    payload: { allowCredit: boolean; creditLimit: number },
+  ) => {
+    const response = await axiosInstance.patch(
+      API_ROUTES.USERS.UPDATE_CREDIT(id),
+      payload,
+    );
+    return response.data;
+  },
 };

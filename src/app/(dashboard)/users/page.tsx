@@ -113,6 +113,22 @@ export default function UsersPage() {
       ),
     },
     {
+      key: "allowCredit",
+      header: "Credit Account",
+      render: (row) => (
+        <span
+          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+            row?.allowCredit
+              ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
+              : "bg-muted text-muted-foreground"
+          }`}>
+          {row?.allowCredit
+            ? `Max ${row?.creditLimit || 0} Orders`
+            : "Disabled"}
+        </span>
+      ),
+    },
+    {
       key: "createdAt",
       header: "Joined Date",
       render: (row) => (

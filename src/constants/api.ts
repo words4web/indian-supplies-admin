@@ -30,6 +30,7 @@ export const API_ROUTES = {
     LIST: "/admin/users",
     DETAIL: (id: string) => `/admin/users/${id}`,
     UPDATE_STATUS: (id: string) => `/admin/users/${id}/status`,
+    UPDATE_CREDIT: (id: string) => `/admin/users/${id}/credit`,
   },
   UPLOAD: {
     GET_URLS: "/admin/upload/get-urls",

@@ -37,3 +37,24 @@ export const useUpdateUserStatusMutation = () => {
     },
   });
 };
+
+export const useUpdateUserCreditMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      allowCredit,
+      creditLimit,
+    }: {
+      id: string;
+      allowCredit: boolean;
+      creditLimit: number;
+    }) => userService.updateUserCredit(id, { allowCredit, creditLimit }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.all });
+      queryClient.invalidateQueries({
+        queryKey: USER_QUERY_KEYS.detail(variables.id),
+      });
+    },
+  });
+};

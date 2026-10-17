@@ -13,6 +13,8 @@ import {
   XCircle,
   Eye,
   Package,
+  CreditCard,
+  Settings2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -21,8 +23,10 @@ import { DataTable, type TableColumn } from "@/components/common/DataTable";
 import {
   useUserDetailQuery,
   useUpdateUserStatusMutation,
+  useUpdateUserCreditMutation,
 } from "@/services/user/user.hook";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
+import { EditCreditModal } from "@/components/user/EditCreditModal";
 import { SavedAddresses } from "@/components/user/saved-addresses";
 import { formatPounds } from "@/lib/format";
 import { ROUTES } from "@/constants/routes";
@@ -32,6 +36,7 @@ export default function UserDetailPage() {
   const router = useRouter();
   const userId = params?.id as string;
   const [showStatusConfirm, setShowStatusConfirm] = useState(false);
+  const [showCreditModal, setShowCreditModal] = useState(false);
 
   const {
     data: responseBody,
@@ -46,6 +51,31 @@ export default function UserDetailPage() {
   const orders = userData?.orders || [];
 
   const updateStatusMutation = useUpdateUserStatusMutation();
+  const updateCreditMutation = useUpdateUserCreditMutation();
+
+  const handleConfirmCreditChange = (data: {
+    allowCredit: boolean;
+    creditLimit: number;
+  }) => {
+    updateCreditMutation.mutate(
+      {
+        id: userId,
+        allowCredit: data.allowCredit,
+        creditLimit: data.creditLimit,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Customer credit settings updated successfully.");
+          setShowCreditModal(false);
+        },
+        onError: (err: any) => {
+          toast.error(
+            err.response?.data?.message || "Failed to update credit settings.",
+          );
+        },
+      },
+    );
+  };
 
   const handleConfirmStatusChange = () => {
     if (!user) return;
@@ -246,6 +276,59 @@ export default function UserDetailPage() {
           </div>
 
           <SavedAddresses addresses={user?.addresses} />
+
+          <div className="flex flex-col justify-between rounded-2xl border border-border/70 bg-card p-5 shadow-sm lg:col-span-2">
+            <div>
+              <div className="flex items-center justify-between pb-3.5 border-b border-border/60">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    <CreditCard className="size-5" />
+                  </div>
+                  <div>
+                    <h2 className="font-serif text-base sm:text-lg font-bold text-foreground">
+                      Credit Account Settings
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                      Configure customer credit purchases and maximum order
+                      limits
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowCreditModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-border bg-background hover:bg-muted text-foreground transition-all cursor-pointer">
+                  <Settings2 className="size-3.5" /> Configure
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 py-4">
+                <div className="rounded-xl border border-border/60 bg-muted/30 p-3 text-center">
+                  <p className="text-[11px] font-medium text-muted-foreground">
+                    Credit Status
+                  </p>
+                  <p
+                    className={`text-sm font-bold mt-1 ${
+                      user?.allowCredit
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-muted-foreground"
+                    }`}>
+                    {user?.allowCredit ? "Enabled" : "Disabled"}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-border/60 bg-muted/30 p-3 text-center">
+                  <p className="text-[11px] font-medium text-muted-foreground">
+                    Credit Purchase Limit
+                  </p>
+                  <p className="text-sm font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1">
+                    {user?.creditLimit || 0} Orders
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-3.5">
@@ -285,6 +368,16 @@ export default function UserDetailPage() {
           confirmText={user?.isActive ? "Deactivate" : "Approve Account"}
           variant={user?.isActive ? "destructive" : "default"}
           isLoading={updateStatusMutation.isPending}
+        />
+
+        <EditCreditModal
+          isOpen={showCreditModal}
+          onClose={() => setShowCreditModal(false)}
+          onConfirm={handleConfirmCreditChange}
+          customerName={user?.fullName || "Customer"}
+          initialAllowCredit={Boolean(user?.allowCredit)}
+          initialCreditLimit={user?.creditLimit || 0}
+          isLoading={updateCreditMutation.isPending}
         />
       </div>
     </QueryBoundary>
