@@ -45,11 +45,18 @@ export const useUpdateUserCreditMutation = () => {
       id,
       allowCredit,
       creditLimit,
+      minOrderAmount,
     }: {
       id: string;
       allowCredit: boolean;
       creditLimit: number;
-    }) => userService.updateUserCredit(id, { allowCredit, creditLimit }),
+      minOrderAmount?: number;
+    }) =>
+      userService.updateUserCredit(id, {
+        allowCredit,
+        creditLimit,
+        minOrderAmount,
+      }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.all });
       queryClient.invalidateQueries({

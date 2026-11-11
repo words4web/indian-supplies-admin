@@ -28,7 +28,11 @@ export const userService = {
 
   updateUserCredit: async (
     id: string,
-    payload: { allowCredit: boolean; creditLimit: number },
+    payload: {
+      allowCredit: boolean;
+      creditLimit: number;
+      minOrderAmount?: number;
+    },
   ) => {
     const response = await axiosInstance.patch(
       API_ROUTES.USERS.UPDATE_CREDIT(id),

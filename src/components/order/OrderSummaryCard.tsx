@@ -13,6 +13,7 @@ export function OrderSummaryCard({
   onSubmitOrder,
   isValid,
   isSubmitting,
+  minOrderAmount = 150,
 }: OrderSummaryCardProps) {
   const { subtotal, vat, total } = (selectedItems || [])?.reduce(
     (acc, item) => {
@@ -27,6 +28,8 @@ export function OrderSummaryCard({
     },
     { subtotal: 0, vat: 0, total: 0 },
   );
+
+  const isBelowMin = selectedItems.length > 0 && total < minOrderAmount;
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 space-y-5 shadow-sm sticky top-6">
@@ -76,6 +79,19 @@ export function OrderSummaryCard({
         </div>
       </div>
 
+      {isBelowMin && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-300 space-y-1">
+          <p className="font-bold">
+            Minimum order requirement is {formatPounds(minOrderAmount)}
+          </p>
+          <p className="text-[11px] opacity-90">
+            Total must be at least {formatPounds(minOrderAmount)} to create
+            order (needs {formatPounds(Math.max(0, minOrderAmount - total))}{" "}
+            more).
+          </p>
+        </div>
+      )}
+
       <div className="space-y-1.5 pt-2">
         <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
           <FileText className="size-3.5 text-muted-foreground" />
@@ -92,16 +108,21 @@ export function OrderSummaryCard({
 
       <Button
         onClick={onSubmitOrder}
-        disabled={!isValid || isSubmitting}
+        disabled={!isValid || isSubmitting || isBelowMin}
         className="w-full h-11 text-sm font-bold shadow-lg shadow-primary/20">
         {isSubmitting ? "Creating Order..." : "Create Wholesale Order"}
       </Button>
 
-      {!isValid && (
+      {!isValid ? (
         <p className="text-[11px] text-center text-muted-foreground">
           Please select a customer, delivery address, and at least 1 product.
         </p>
-      )}
+      ) : isBelowMin ? (
+        <p className="text-[11px] text-center text-amber-600 dark:text-amber-400 font-medium">
+          Order total does not meet customer&apos;s minimum{" "}
+          {formatPounds(minOrderAmount)} delivery limit.
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -135,4 +135,5 @@ export interface OrderSummaryCardProps {
   onSubmitOrder: () => void;
   isValid: boolean;
   isSubmitting: boolean;
+  minOrderAmount?: number;
 }

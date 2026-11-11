@@ -8,6 +8,7 @@ import { CustomerSelector } from "@/components/order/CustomerSelector";
 import { ProductSelector } from "@/components/order/ProductSelector";
 import { OrderSummaryCard } from "@/components/order/OrderSummaryCard";
 import { useCreateAdminOrderMutation } from "@/services/order/order.hook";
+import { useUserDetailQuery } from "@/services/user/user.hook";
 import { ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 import { SelectedOrderItem } from "@/types/order.types";
@@ -20,6 +21,13 @@ export default function CreateOrderPage() {
   const [selectedItems, setSelectedItems] = useState<SelectedOrderItem[]>([]);
   const [notes, setNotes] = useState<string>("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const { data: userDetailResponse } = useUserDetailQuery(
+    selectedUserId,
+    !!selectedUserId,
+  );
+  const selectedUser = userDetailResponse?.data?.user;
+  const customerMinOrder = Number(selectedUser?.minOrderAmount ?? 150);
 
   const createOrderMutation = useCreateAdminOrderMutation({
     onSuccess: (data) => {
@@ -144,6 +152,7 @@ export default function CreateOrderPage() {
             onSubmitOrder={() => setShowConfirmModal(true)}
             isValid={isFormValid}
             isSubmitting={createOrderMutation.isPending}
+            minOrderAmount={customerMinOrder}
           />
         </div>
       </div>

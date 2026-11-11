@@ -56,21 +56,23 @@ export default function UserDetailPage() {
   const handleConfirmCreditChange = (data: {
     allowCredit: boolean;
     creditLimit: number;
+    minOrderAmount: number;
   }) => {
     updateCreditMutation.mutate(
       {
         id: userId,
         allowCredit: data.allowCredit,
         creditLimit: data.creditLimit,
+        minOrderAmount: data.minOrderAmount,
       },
       {
         onSuccess: () => {
-          toast.success("Customer credit settings updated successfully.");
+          toast.success("Customer credit and delivery settings updated.");
           setShowCreditModal(false);
         },
         onError: (err: any) => {
           toast.error(
-            err.response?.data?.message || "Failed to update credit settings.",
+            err.response?.data?.message || "Failed to update settings.",
           );
         },
       },
@@ -303,7 +305,7 @@ export default function UserDetailPage() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 py-4">
+              <div className="grid grid-cols-3 gap-3 py-4">
                 <div className="rounded-xl border border-border/60 bg-muted/30 p-3 text-center">
                   <p className="text-[11px] font-medium text-muted-foreground">
                     Credit Status
@@ -320,10 +322,19 @@ export default function UserDetailPage() {
 
                 <div className="rounded-xl border border-border/60 bg-muted/30 p-3 text-center">
                   <p className="text-[11px] font-medium text-muted-foreground">
-                    Credit Purchase Limit
+                    Credit Limit
                   </p>
                   <p className="text-sm font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1">
                     {user?.creditLimit || 0} Orders
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-border/60 bg-muted/30 p-3 text-center">
+                  <p className="text-[11px] font-medium text-muted-foreground">
+                    Min Delivery
+                  </p>
+                  <p className="text-sm font-bold font-mono text-primary mt-1">
+                    £{Number(user?.minOrderAmount ?? 150).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -377,6 +388,7 @@ export default function UserDetailPage() {
           customerName={user?.fullName || "Customer"}
           initialAllowCredit={Boolean(user?.allowCredit)}
           initialCreditLimit={user?.creditLimit || 0}
+          initialMinOrderAmount={Number(user?.minOrderAmount ?? 150)}
           isLoading={updateCreditMutation.isPending}
         />
       </div>

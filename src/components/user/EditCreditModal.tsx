@@ -8,10 +8,15 @@ import { Input } from "@/components/common/Input";
 interface EditCreditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (data: { allowCredit: boolean; creditLimit: number }) => void;
+  onConfirm: (data: {
+    allowCredit: boolean;
+    creditLimit: number;
+    minOrderAmount: number;
+  }) => void;
   customerName: string;
   initialAllowCredit: boolean;
   initialCreditLimit: number;
+  initialMinOrderAmount?: number;
   isLoading?: boolean;
 }
 
@@ -22,18 +27,23 @@ export function EditCreditModal({
   customerName,
   initialAllowCredit,
   initialCreditLimit,
+  initialMinOrderAmount = 150,
   isLoading = false,
 }: EditCreditModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [allowCredit, setAllowCredit] = useState(initialAllowCredit);
   const [creditLimit, setCreditLimit] = useState(String(initialCreditLimit));
+  const [minOrderAmount, setMinOrderAmount] = useState(
+    String(initialMinOrderAmount ?? 150),
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setAllowCredit(initialAllowCredit);
     setCreditLimit(String(initialCreditLimit));
+    setMinOrderAmount(String(initialMinOrderAmount ?? 150));
     setError(null);
-  }, [initialAllowCredit, initialCreditLimit, isOpen]);
+  }, [initialAllowCredit, initialCreditLimit, initialMinOrderAmount, isOpen]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -88,6 +98,7 @@ export function EditCreditModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const limitNum = parseInt(creditLimit, 10);
+    const minOrderNum = parseFloat(minOrderAmount);
 
     if (allowCredit) {
       if (isNaN(limitNum)) {
@@ -100,10 +111,16 @@ export function EditCreditModal({
       }
     }
 
+    if (isNaN(minOrderNum) || minOrderNum < 0) {
+      setError("Please enter a valid minimum order delivery amount.");
+      return;
+    }
+
     setError(null);
     onConfirm({
       allowCredit,
       creditLimit: allowCredit ? limitNum : 0,
+      minOrderAmount: minOrderNum,
     });
   };
 
@@ -179,6 +196,26 @@ export function EditCreditModal({
             />
             <p className="text-[11px] text-muted-foreground mt-1">
               Maximum credit orders allowed (0 – 100).
+            </p>
+          </div>
+
+          <div className="pt-2 border-t border-border/50">
+            <Input
+              label="Minimum Order Delivery Amount (£)"
+              id="min-order-amount"
+              type="number"
+              min={0}
+              step="any"
+              value={minOrderAmount}
+              onChange={(e) => {
+                setMinOrderAmount(e.target.value);
+                setError(null);
+              }}
+              placeholder="150"
+              disabled={isLoading}
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Customer cannot place orders below this total (default: £150).
             </p>
             {error && (
               <div className="flex items-center gap-1.5 text-xs text-destructive mt-1.5 font-medium">

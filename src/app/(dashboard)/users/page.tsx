@@ -129,6 +129,15 @@ export default function UsersPage() {
       ),
     },
     {
+      key: "minOrderAmount",
+      header: "Min Delivery",
+      render: (row) => (
+        <span className="text-xs font-semibold font-mono text-foreground">
+          £{Number(row?.minOrderAmount ?? 150).toFixed(2)}
+        </span>
+      ),
+    },
+    {
       key: "createdAt",
       header: "Joined Date",
       render: (row) => (
