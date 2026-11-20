@@ -15,19 +15,22 @@ export function OrderSummaryCard({
   isSubmitting,
   minOrderAmount = 150,
 }: OrderSummaryCardProps) {
-  const { subtotal, vat, total } = (selectedItems || [])?.reduce(
+  const { rawSubtotal, rawVat } = (selectedItems || [])?.reduce(
     (acc, item) => {
       const price = item?.price ?? 0;
       const quantity = item?.quantity ?? 0;
       const itemSubtotal = price * quantity;
       const itemVat = item?.isVatApplicable ? itemSubtotal * 0.2 : 0;
-      acc.subtotal += itemSubtotal;
-      acc.vat += itemVat;
-      acc.total += itemSubtotal + itemVat;
+      acc.rawSubtotal += itemSubtotal;
+      acc.rawVat += itemVat;
       return acc;
     },
-    { subtotal: 0, vat: 0, total: 0 },
+    { rawSubtotal: 0, rawVat: 0 },
   );
+
+  const subtotal = Math.round(rawSubtotal * 100) / 100;
+  const vat = Math.round(rawVat * 100) / 100;
+  const total = Math.round((subtotal + vat) * 100) / 100;
 
   const isBelowMin = selectedItems.length > 0 && total < minOrderAmount;
 
