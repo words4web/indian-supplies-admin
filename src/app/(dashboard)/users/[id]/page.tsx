@@ -15,6 +15,9 @@ import {
   Package,
   CreditCard,
   Settings2,
+  FileText,
+  UserCheck,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -278,6 +281,124 @@ export default function UserDetailPage() {
           </div>
 
           <SavedAddresses addresses={user?.addresses} />
+
+          {/* Wholesale Account & Registration Details */}
+          <div className="flex flex-col justify-between rounded-2xl border border-border/70 bg-card p-5 shadow-sm lg:col-span-2">
+            <div>
+              <div className="flex items-center gap-3 pb-3.5 border-b border-border/60">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <FileText className="size-5" />
+                </div>
+                <div>
+                  <h2 className="font-serif text-base sm:text-lg font-bold text-foreground">
+                    Wholesale Account Information
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Companies House registration, VAT details, and registered contacts
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                {/* Company & VAT Registration */}
+                <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-2.5">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                    <Building2 className="size-3.5" />
+                    <span>Company & Tax</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs">
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">Company Reg. No (CRN):</span>
+                      <span className="font-mono font-bold text-foreground">
+                        {user?.companyRegistrationNumber || "Not Provided"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">VAT Number:</span>
+                      <span className="font-mono font-bold text-foreground">
+                        {user?.vatNumber || "Not Provided"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">Registered Office:</span>
+                      <span className="font-medium text-foreground">
+                        {[
+                          user?.registeredAddress?.streetAddress,
+                          user?.registeredAddress?.building,
+                          user?.registeredAddress?.city,
+                          user?.registeredAddress?.postalCode,
+                        ]
+                          .filter(Boolean)
+                          .join(", ") || "Not Provided"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Director Details */}
+                <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-2.5">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                    <UserCheck className="size-3.5" />
+                    <span>Director Details</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs">
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">Director Name:</span>
+                      <span className="font-medium text-foreground">
+                        {user?.directorDetails?.name || "Not Provided"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">Phone:</span>
+                      <span className="font-mono font-medium text-foreground">
+                        {user?.directorDetails?.phone || "Not Provided"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">Email:</span>
+                      <span className="font-medium text-foreground truncate block">
+                        {user?.directorDetails?.email || "Not Provided"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">Address:</span>
+                      <span className="font-medium text-foreground">
+                        {user?.directorDetails?.address || "Not Provided"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Accounts Payable Details */}
+                <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-2.5">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                    <ShieldCheck className="size-3.5" />
+                    <span>Accounts Payable Contact</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs">
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">Finance Contact:</span>
+                      <span className="font-medium text-foreground">
+                        {user?.accountsPayable?.name || "Not Provided"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">Invoicing Phone:</span>
+                      <span className="font-mono font-medium text-foreground">
+                        {user?.accountsPayable?.phone || "Not Provided"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">Invoicing Email:</span>
+                      <span className="font-medium text-foreground truncate block">
+                        {user?.accountsPayable?.email || "Not Provided"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="flex flex-col justify-between rounded-2xl border border-border/70 bg-card p-5 shadow-sm lg:col-span-2">
             <div>
