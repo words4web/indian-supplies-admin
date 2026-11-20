@@ -8,6 +8,7 @@ import { ErrorView } from "@/components/common/ErrorView";
 import {
   useAdminOrderDetailQuery,
   useUpdateOrderStatusMutation,
+  useMarkOrderAsPaidMutation,
 } from "@/services/order/order.hook";
 import { ROUTES } from "@/constants/routes";
 import { OrderHeader } from "@/components/order/order-header";
@@ -28,6 +29,7 @@ export default function OrderDetailPage() {
   } = useAdminOrderDetailQuery(orderId);
 
   const updateStatusMutation = useUpdateOrderStatusMutation();
+  const markAsPaidMutation = useMarkOrderAsPaidMutation();
 
   const order = responseBody?.data;
 
@@ -80,12 +82,16 @@ export default function OrderDetailPage() {
         orderId={order?.orderId}
         createdAt={order?.createdAt}
         status={order?.status}
+        paymentMethod={order?.paymentMethod}
+        paymentStatus={order?.paymentStatus}
         total={order?.total}
         isDelivered={isDelivered}
         isUpdating={updateStatusMutation.isPending}
+        isMarkingPaid={markAsPaidMutation.isPending}
         invoiceUrl={order?.invoiceUrl}
         deliveryNoteUrl={order?.deliveryNoteUrl}
         onUpdateStatus={handleUpdateStatus}
+        onMarkPaid={() => markAsPaidMutation.mutate(order._id)}
       />
 
       <OrderCustomerDetails delivery={order?.delivery} userId={order?.userId} />

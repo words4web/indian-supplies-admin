@@ -61,3 +61,25 @@ export const useUpdateOrderStatusMutation = (options?: {
     },
   });
 };
+
+export const useMarkOrderAsPaidMutation = (options?: {
+  onSuccess?: () => void;
+}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => orderService.markAsPaid(id),
+    onSuccess: (data, variables) => {
+      toast.success(data?.message || "Order marked as paid successfully.");
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "orders", variables],
+      });
+      options?.onSuccess?.();
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || "Failed to mark order as paid.",
+      );
+    },
+  });
+};

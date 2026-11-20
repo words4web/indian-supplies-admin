@@ -5,6 +5,8 @@ import {
   Clock,
   FileText,
   Truck,
+  CreditCard,
+  Banknote,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
@@ -15,13 +17,21 @@ export function OrderHeader({
   orderId,
   createdAt,
   total,
+  paymentMethod,
+  paymentStatus,
   isDelivered,
   isUpdating,
+  isMarkingPaid,
   deliveryNoteUrl,
   invoiceUrl,
   onUpdateStatus,
+  onMarkPaid,
 }: OrderHeaderProps) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showPaidModal, setShowPaidModal] = useState(false);
+
+  const isPaid = paymentStatus === "PAID";
+  const isCredit = paymentMethod === "CREDIT";
 
   return (
     <>
@@ -43,6 +53,17 @@ export function OrderHeader({
                 In Process
               </span>
             )}
+            {isPaid ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                <Banknote className="size-3.5" />
+                Paid
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-0.5 text-xs font-bold text-rose-600 dark:text-rose-400">
+                <Clock className="size-3.5" />
+                Payment Pending {isCredit ? "(Credit)" : ""}
+              </span>
+            )}
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground">
             Placed on{" "}
@@ -57,6 +78,11 @@ export function OrderHeader({
                   })
                 : "N/A"}
             </span>
+            {paymentMethod && (
+              <span className="ml-2 font-semibold">
+                • Payment: <span className="text-foreground">{paymentMethod}</span>
+              </span>
+            )}
           </p>
         </div>
 
@@ -87,6 +113,17 @@ export function OrderHeader({
             </Button>
           )}
 
+          {isCredit && !isPaid && onMarkPaid && (
+            <Button
+              size="sm"
+              disabled={isMarkingPaid}
+              onClick={() => setShowPaidModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-sm cursor-pointer h-9 gap-1.5">
+              <Banknote className="size-4" />
+              {isMarkingPaid ? "Updating…" : "Mark as Paid"}
+            </Button>
+          )}
+
           {!isDelivered && (
             <Button
               size="sm"
@@ -102,10 +139,26 @@ export function OrderHeader({
       <ConfirmModal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
-        onConfirm={() => onUpdateStatus("DELIVERED")}
+        onConfirm={() => {
+          setShowConfirmModal(false);
+          onUpdateStatus("DELIVERED");
+        }}
         title="Mark Order as Delivered"
         description={`Are you sure you want to mark Order #${orderId} as Delivered? This will confirm that the delivery has been completed.`}
         confirmText="Confirm Delivery"
+        cancelText="Cancel"
+      />
+
+      <ConfirmModal
+        isOpen={showPaidModal}
+        onClose={() => setShowPaidModal(false)}
+        onConfirm={() => {
+          setShowPaidModal(false);
+          onMarkPaid?.();
+        }}
+        title="Mark Credit Order as Paid"
+        description={`Are you sure you want to mark Order #${orderId} as Paid? This will settle this credit invoice.`}
+        confirmText="Confirm Paid"
         cancelText="Cancel"
       />
     </>

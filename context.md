@@ -179,6 +179,17 @@ This document provides a comprehensive overview of the **Indian Supplies Admin D
   - Triggers `useCreateAdminOrder` mutation (`POST /api/v1/admin/orders`).
   - Automatically redirects to the newly created order detail page (`/orders/[id]`).
 
+- **Order Management & Detail View (`/orders/[id]`)**:
+  - Displays `OrderHeader`, `OrderCustomerDetails`, and `OrderItemsTable`.
+  - **Fulfillment Status**: Supports marking orders as `DELIVERED` with accessible confirmation modal (`ConfirmModal.tsx`).
+  - **Wholesale Credit Payment Settlement**:
+    - For credit orders (`paymentMethod === 'CREDIT'`), displays real-time payment status (`Paid` badge or `Payment Pending (Credit)` badge).
+    - Provides a dedicated **"Mark as Paid"** action with confirmation modal to settle unpaid credit invoices via `orderService.markAsPaid` (`PATCH /api/v1/admin/orders/:id/payment-status`).
+  - **Document Links**: Instant access buttons to view/download generated S3 `Invoice` and `Delivery Note` PDFs.
+- **Retailer Profile & Wholesale Account Management (`/users/[id]`)**:
+  - Displays client business details including Company Registration Number, VAT Registration Number, Director Details, Contact Details, and Accounts Payable Information.
+  - Credit account toggling (`allowCredit`) and credit purchase limit adjustments.
+
 ---
 
 ## 7. Product Management & Form Workflow

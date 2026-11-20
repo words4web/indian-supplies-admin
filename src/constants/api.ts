@@ -25,6 +25,7 @@ export const API_ROUTES = {
     CREATE: "/admin/orders",
     DETAIL: (id: string) => `/admin/orders/${id}`,
     UPDATE_STATUS: (id: string) => `/admin/orders/${id}/status`,
+    UPDATE_PAYMENT_STATUS: (id: string) => `/admin/orders/${id}/payment-status`,
   },
   USERS: {
     LIST: "/admin/users",

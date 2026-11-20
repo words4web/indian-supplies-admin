@@ -41,6 +41,8 @@ export interface OrderRow {
   total: number;
   delivery: DeliveryDetails;
   status: OrderStatus;
+  paymentMethod?: "CREDIT" | "STRIPE";
+  paymentStatus?: "PENDING" | "PAID";
   deliveryNoteUrl?: string;
   invoiceUrl?: string;
   createdAt: string;
@@ -59,12 +61,16 @@ export interface OrderHeaderProps {
   orderId?: string;
   createdAt?: string;
   status?: string;
+  paymentMethod?: "CREDIT" | "STRIPE";
+  paymentStatus?: "PENDING" | "PAID";
   total?: number;
   isDelivered: boolean;
   isUpdating: boolean;
+  isMarkingPaid?: boolean;
   deliveryNoteUrl?: string;
   invoiceUrl?: string;
   onUpdateStatus: (status: "DELIVERED" | "IN_PROCESS") => void;
+  onMarkPaid?: () => void;
 }
 
 export interface OrderCustomerDetailsProps {

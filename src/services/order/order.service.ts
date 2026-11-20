@@ -36,5 +36,12 @@ export const orderService = {
     );
     return response?.data;
   },
+  markAsPaid: async (id: string) => {
+    const response = await axiosInstance.patch(
+      API_ROUTES.ORDERS.UPDATE_PAYMENT_STATUS(id),
+      { paymentStatus: "PAID" },
+    );
+    return response?.data;
+  },
 };
 export default orderService;
