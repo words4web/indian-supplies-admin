@@ -15,7 +15,7 @@ export function SavedAddresses({ addresses = [] }: { addresses?: Address[] }) {
             </h2>
           </div>
           <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-            {count}
+            {count} / 5
           </span>
         </div>
 

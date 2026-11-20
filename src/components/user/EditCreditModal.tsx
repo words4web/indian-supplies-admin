@@ -105,8 +105,8 @@ export function EditCreditModal({
         setError("Please enter a valid credit limit.");
         return;
       }
-      if (limitNum < 0 || limitNum > 100) {
-        setError("Credit limit must be between 0 and 100.");
+      if (limitNum < 0 || limitNum > 10) {
+        setError("Credit limit must be between 0 and 10.");
         return;
       }
     }
@@ -185,7 +185,7 @@ export function EditCreditModal({
               id="credit-limit"
               type="number"
               min={0}
-              max={100}
+              max={10}
               value={creditLimit}
               onChange={(e) => {
                 setCreditLimit(e.target.value);
@@ -195,7 +195,7 @@ export function EditCreditModal({
               disabled={!allowCredit || isLoading}
             />
             <p className="text-[11px] text-muted-foreground mt-1">
-              Maximum credit orders allowed (0 – 100).
+              Maximum credit orders allowed (0 – 10).
             </p>
           </div>
 
